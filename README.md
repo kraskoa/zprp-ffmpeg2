@@ -24,4 +24,4 @@
 - Updating the documentation to include implemented changes
 - Adding more detailed architecture description to explain the responsibilities of different components
 
-### Technological stack remains the same as the one used in zprp-python
+### Technological stack remains the same as the one used in zprp-ffmpeg
