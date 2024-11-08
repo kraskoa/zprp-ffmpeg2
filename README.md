@@ -25,3 +25,29 @@
 - Adding more detailed architecture description to explain the responsibilities of different components
 
 ### Technological stack remains the same as the one used in zprp-ffmpeg
+- Python 3.8+
+- pytest (tox)
+- ffmpeg-python (for testing compatibility)
+- mypy
+- oslex (for code linting)
+- poetry (for dependency management)
+- tqdm (for progress bars)
+- black
+- tox
+- networkx
+- matplotlib
+- pycparser
+- tqdm
+- ruff
+
+
+### Testing methodology
+- Unit tests for more functions for current functionalities, which are not covered yet
+- Integration tests for newly added functionalities
+- Tests for compatibility with ffmpeg-python library tests
+  - This will be done by running the tests from the ffmpeg-python library on the zprp-ffmpeg library
+- Tests for multi-input sources support
+  - This will be done by presenting the examples with multiple input sources and checking if the command is generated correctly
+- Tests for multi-output merging support
+  - This will be done by presenting the examples with multiple output sources and checking if the command is generated correctly
+
