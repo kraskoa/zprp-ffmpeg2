@@ -50,4 +50,3 @@
   - This will be done by presenting the examples with multiple input sources and checking if the command is generated correctly
 - Tests for multi-output merging support
   - This will be done by presenting the examples with multiple output sources and checking if the command is generated correctly
-
