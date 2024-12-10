@@ -77,7 +77,8 @@ class SourceFilter:
 
     def get_command(self):
         return {
-            "command": "-i " + self.in_path,
+            "command": "",
+            "file": self.in_path,
             "params": "",
             "filter_type": "",
         }
@@ -98,7 +99,8 @@ class SinkFilter:
 
     def get_command(self):
         return {
-            "command": "-map " + self.out_path,
+            "command": "",
+            "file": self.out_path,
             "params": "",
             "filter_type": "",
         }
@@ -183,6 +185,9 @@ class FilterParser:
             command = command_dict.get("command")
             filter_type_command = command_dict.get("filter_type_command")
             params = command_dict.get("params")
+            map_cmd = "-map"
+            i_cmd = "-i"
+            file = command_dict.get("file")
 
             # many inputs one output
             if any(filter_ in command for filter_ in self.multi_input):
@@ -195,13 +200,12 @@ class FilterParser:
                 self.result_counter += 1
             # input
             elif isinstance(node, SourceFilter):
-                self.inputs.append(f"{command}")
+                self.inputs.append(f"{i_cmd} {file}")
                 last = self.inputs_counter
                 self.inputs_counter += 1
                 continue
             # output
             elif isinstance(node, SinkFilter):
-                map_cmd, file = command.split(" ")
                 self.outputs.append(f"{map_cmd} [{last}] {file}")
                 self.outputs_counter += 1
                 continue
