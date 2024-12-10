@@ -4,7 +4,7 @@ version = "2.2.0"
 description = "ffmpeg filter graph bindings for python"
 authors = ["Your Name <you@example.com>"]
 license = "MIT"
-readme = "README.rst"
+readme = "README_old.rst"
 
 [tool.poetry.dependencies]
 python = "^3.8"

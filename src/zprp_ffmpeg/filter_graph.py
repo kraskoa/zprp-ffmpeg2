@@ -38,15 +38,21 @@ class Filter:
 
     def get_command(self):
         joined_params = ":".join(p.name + "=" + str(p.value) for p in self.params if p.value)
-        if joined_params:  # if there was no option, leave empty string
-            joined_params = "=" + joined_params
-        if self.filter_type == "AVMEDIA_TYPE_VIDEO":
-            return ":v]" + self.command + joined_params
-
-        elif self.filter_type == "AVMEDIA_TYPE_AUDIO":
-            return ":a]" + self.command + joined_params
-
-        return ""  # in case no match
+        # if joined_params:  # if there was no option, leave empty string
+        #     joined_params = "=" + joined_params
+        # if self.filter_type == "AVMEDIA_TYPE_VIDEO":
+        #     return ":v]" + self.command + joined_params
+        #
+        # elif self.filter_type == "AVMEDIA_TYPE_AUDIO":
+        #     return ":a]" + self.command + joined_params
+        #
+        # return ""  # in case no match
+        command_dict = {
+            "command": self.command,
+            "params": joined_params,
+            "filter_type": self.filter_type,
+        }
+        return command_dict
 
 
 # names as per ffmpeg documentation
@@ -64,7 +70,11 @@ class SourceFilter:
         raise NotImplementedError("This node can't have inputs")
 
     def get_command(self):
-        return "-i " + self.in_path
+        return {
+            "command": "-i " + self.in_path,
+            "params": "",
+            "filter_type": "",
+        }
 
 
 class SinkFilter:
@@ -81,7 +91,11 @@ class SinkFilter:
         raise NotImplementedError("This node can't have outputs")
 
     def get_command(self):
-        return "-map " + self.out_path
+        return {
+            "command": "-map " + self.out_path,
+            "params": "",
+            "filter_type": "",
+        }
 
 
 # in python 3.12 there is 'type' keyword, but we are targetting 3.8
@@ -120,13 +134,49 @@ class FilterParser:
         self.outputs = []
         self.filters = []
 
+    # def generate_command(self, stream: Stream) -> str:  # type: ignore
+    # last = "None"
+    # for node in stream._nodes:
+    #     # many inputs one output
+    #     if (command := node.get_command()) and any(filter_ in command for filter_ in self.multi_input):
+    #         last_results = []
+    #         _, command = command.split("]")
+    #         for graph in node._in:  # type: ignore
+    #             last_results.append(self.generate_command(graph))  # type: ignore
+    #         results = "".join([f"[{result}]" for result in last_results])
+    #         self.filters.append(f"{results}{command}[v{self.result_counter}];")
+    #         last = f"v{self.result_counter}"
+    #         self.result_counter += 1
+    #     # input
+    #     elif isinstance(node, SourceFilter):
+    #         self.inputs.append(f"{command}")
+    #         last = self.inputs_counter
+    #         self.inputs_counter += 1
+    #         continue
+    #     # output
+    #     elif isinstance(node, SinkFilter):
+    #         map_cmd, file = command.split(" ")
+    #         self.outputs.append(f"{map_cmd} [{last}] {file}")
+    #         self.outputs_counter += 1
+    #         continue
+    #     # single input single output
+    #     else:
+    #         if isinstance(last, int):
+    #             self.filters.append(f"[{last}{command}[v{self.result_counter}];")
+    #         else:
+    #             self.filters.append(f"[{last}{command[2:]}[v{self.result_counter}];")
+    #         last = f"v{self.result_counter}"
+    #         self.result_counter += 1
+    # if len(self.filters) == 0 and len(stream._nodes) != 1:  # case of single input is allowed for overlay
+    #     raise ValueError("No filters selected")
+    # return last
     def generate_command(self, stream: Stream) -> str:  # type: ignore
         last = "None"
         for node in stream._nodes:
             # many inputs one output
-            if (command := node.get_command()) and any(filter_ in command for filter_ in self.multi_input):
+            if (command_dict := node.get_command()) and any(filter_ in command_dict["command"] for filter_ in self.multi_input):
                 last_results = []
-                _, command = command.split("]")
+                command = command_dict["command"]
                 for graph in node._in:  # type: ignore
                     last_results.append(self.generate_command(graph))  # type: ignore
                 results = "".join([f"[{result}]" for result in last_results])
@@ -135,22 +185,22 @@ class FilterParser:
                 self.result_counter += 1
             # input
             elif isinstance(node, SourceFilter):
-                self.inputs.append(f"{command}")
+                self.inputs.append(f"{command_dict['command']}")
                 last = self.inputs_counter
                 self.inputs_counter += 1
                 continue
             # output
             elif isinstance(node, SinkFilter):
-                map_cmd, file = command.split(" ")
+                map_cmd, file = command_dict["command"].split(" ")
                 self.outputs.append(f"{map_cmd} [{last}] {file}")
                 self.outputs_counter += 1
                 continue
             # single input single output
             else:
                 if isinstance(last, int):
-                    self.filters.append(f"[{last}{command}[v{self.result_counter}];")
+                    self.filters.append(f"[{last}]{command_dict['command']}={command_dict['params']}[v{self.result_counter}];")
                 else:
-                    self.filters.append(f"[{last}{command[2:]}[v{self.result_counter}];")
+                    self.filters.append(f"[{last}]{command_dict['command']}={command_dict['params']}[v{self.result_counter}];")
                 last = f"v{self.result_counter}"
                 self.result_counter += 1
         if len(self.filters) == 0 and len(stream._nodes) != 1:  # case of single input is allowed for overlay
