@@ -45,13 +45,6 @@ class Filter:
         if joined_params:  # if there was no option, leave empty string
             joined_params = "=" + joined_params
         filter_type_command = FilterType.to_command_string(self.command, self.filter_type)
-        # if self.filter_type == "AVMEDIA_TYPE_VIDEO":
-        #     return ":v]" + self.command + joined_params
-        #
-        # elif self.filter_type == "AVMEDIA_TYPE_AUDIO":
-        #     return ":a]" + self.command + joined_params
-        #
-        # return ""  # in case no match
         command_dict = {
             "command": self.command,
             "params": joined_params,
@@ -142,42 +135,7 @@ class FilterParser:
         self.outputs = []
         self.filters = []
 
-    # def generate_command(self, stream: Stream) -> str:  # type: ignore
-    # last = "None"
-    # for node in stream._nodes:
-    #     # many inputs one output
-    #     if (command := node.get_command()) and any(filter_ in command for filter_ in self.multi_input):
-    #         last_results = []
-    #         _, command = command.split("]")
-    #         for graph in node._in:  # type: ignore
-    #             last_results.append(self.generate_command(graph))  # type: ignore
-    #         results = "".join([f"[{result}]" for result in last_results])
-    #         self.filters.append(f"{results}{command}[v{self.result_counter}];")
-    #         last = f"v{self.result_counter}"
-    #         self.result_counter += 1
-    #     # input
-    #     elif isinstance(node, SourceFilter):
-    #         self.inputs.append(f"{command}")
-    #         last = self.inputs_counter
-    #         self.inputs_counter += 1
-    #         continue
-    #     # output
-    #     elif isinstance(node, SinkFilter):
-    #         map_cmd, file = command.split(" ")
-    #         self.outputs.append(f"{map_cmd} [{last}] {file}")
-    #         self.outputs_counter += 1
-    #         continue
-    #     # single input single output
-    #     else:
-    #         if isinstance(last, int):
-    #             self.filters.append(f"[{last}{command}[v{self.result_counter}];")
-    #         else:
-    #             self.filters.append(f"[{last}{command[2:]}[v{self.result_counter}];")
-    #         last = f"v{self.result_counter}"
-    #         self.result_counter += 1
-    # if len(self.filters) == 0 and len(stream._nodes) != 1:  # case of single input is allowed for overlay
-    #     raise ValueError("No filters selected")
-    # return last
+
     def generate_command(self, stream: Stream) -> str:  # type: ignore
         last = "None"
         for node in stream._nodes:
