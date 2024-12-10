@@ -30,7 +30,7 @@ ffmpeg_type_to_python = {
     "AV_OPT_TYPE_FLAG_ARRAY": str,
 }
 
-filter_template = Template(
+FILTER_TEMPLATE = Template(
     """
 def $function_name(graph: Stream, $options):
     \"\"\"$description\"\"\"
@@ -51,37 +51,37 @@ def sanitize(name: str):
     return name
 
 
-def fill_template(filter_template, filter: Filter):
+def fill_template(filter_template, filter_: Filter):
     """constructs python method based on filter dataclass."""
     options = []  # for function declaration
     filter_params = []  # for Filter initialisation
-    for option in filter.options:
+    for option in filter_.options:
         sanitized = sanitize(option.name)
         python_type = ffmpeg_type_to_python[option.type].__qualname__
         options.append(f"{sanitized}: Optional[{python_type}] = None")
         filter_params.append(f'FilterOption(name="{option.name}",value={sanitized})')
         if option.description:
-            filter.description += f"\n    :param {python_type} {option.name}: {option.description}"
+            filter_.description += f"\n    :param {python_type} {option.name}: {option.description}"
         if len(option.available_values) > 0:
-            filter.description += "\n        possible values: "
-            filter.description += ", ".join(option.available_values.keys())
+            filter_.description += "\n        possible values: "
+            filter_.description += ", ".join(option.available_values.keys())
     options_str = ", ".join(options)
     filter_params_str = ", ".join(filter_params)
 
     return filter_template.safe_substitute(
-        function_name=filter.name,
-        filter_type=filter.type,
+        function_name=filter_.name,
+        filter_type=filter_.type,
         options=options_str,
-        description=filter.description,
+        description=filter_.description,
         params=f"[{filter_params_str}]",
     )
 
 
-def construct_file(filters: List[Filter]) -> str:
+def construct_file(filters_list: List[Filter]) -> str:
     out = ""
 
-    for filter in filters:
-        out += fill_template(filter_template, filter)
+    for filter_ in filters_list:
+        out += fill_template(FILTER_TEMPLATE, filter_)
     return out
 
 

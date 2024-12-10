@@ -16,7 +16,7 @@ def view(graph: Stream, filename=None) -> None:
 
     graph_connection = []
 
-    for node in graph._nodes:
+    for node in graph.nodes:
         if isinstance(node, SourceFilter):
             graph_connection.append((node.in_path.split("/")[-1], colors["input"]))
         elif isinstance(node, SinkFilter):

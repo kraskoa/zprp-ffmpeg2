@@ -1,6 +1,7 @@
 """There is no general 'Node' class, because it doesn't work well with object relations, source and sink filters are kind of orthogonal.
 It slightly violates DRY, but the parameter types are different. It is what it is"""
 
+from copy import deepcopy
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any
@@ -47,6 +48,10 @@ class Filter:
             return ":a]" + self.command + joined_params
 
         return ""  # in case no match
+
+    @property
+    def inputs(self):
+        return deepcopy(self._in)
 
 
 # names as per ffmpeg documentation
@@ -107,6 +112,10 @@ class Stream:
         self._nodes.append(node)
         return self  # fluent
 
+    @property
+    def nodes(self):
+        return deepcopy(self._nodes)
+
 
 class FilterParser:
     def __init__(self):
@@ -122,12 +131,12 @@ class FilterParser:
 
     def generate_command(self, stream: Stream) -> str:  # type: ignore
         last = "None"
-        for node in stream._nodes:
+        for node in stream.nodes:
             # many inputs one output
             if (command := node.get_command()) and any(filter_ in command for filter_ in self.multi_input):
                 last_results = []
                 _, command = command.split("]")
-                for graph in node._in:  # type: ignore
+                for graph in node.inputs:  # type: ignore
                     last_results.append(self.generate_command(graph))  # type: ignore
                 results = "".join([f"[{result}]" for result in last_results])
                 self.filters.append(f"{results}{command}[v{self.result_counter}];")
@@ -153,7 +162,7 @@ class FilterParser:
                     self.filters.append(f"[{last}{command[2:]}[v{self.result_counter}];")
                 last = f"v{self.result_counter}"
                 self.result_counter += 1
-        if len(self.filters) == 0 and len(stream._nodes) != 1:  # case of single input is allowed for overlay
+        if len(self.filters) == 0 and len(stream.nodes) != 1:  # case of single input is allowed for overlay
             raise ValueError("No filters selected")
         return last
 
