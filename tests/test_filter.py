@@ -6,12 +6,22 @@ from zprp_ffmpeg.filter_graph import FilterType
 
 def test_filter_build_command_no_opts():
     f = Filter("hflip", filter_type=FilterType.VIDEO.value)
-    assert f.get_command() == ":v]hflip"
+    assert f.get_command() == {
+        "command": "hflip",
+        "params": "",
+        "filter_type": "AVMEDIA_TYPE_VIDEO",
+        "filter_type_command": ":v]",
+    }
 
 
 def test_filter_build_command_with_opts():
     f = Filter("scale", filter_type=FilterType.VIDEO.value, params=[FilterOption("w", "20"), FilterOption("h", "40")])
-    assert f.get_command() == ":v]scale=w=20:h=40"  # order isn't important in ffmpeg i think
+    assert f.get_command() == {
+        "command": "scale",
+        "params": "=w=20:h=40",
+        "filter_type": "AVMEDIA_TYPE_VIDEO",
+        "filter_type_command": ":v]",
+    }
 
 def test_concat():
     g1 = ffmpeg.input("in1.mp4")

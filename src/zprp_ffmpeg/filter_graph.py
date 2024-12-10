@@ -13,6 +13,10 @@ class FilterType(Enum):
     VIDEO = "AVMEDIA_TYPE_VIDEO"
     AUDIO = "AVMEDIA_TYPE_AUDIO"
 
+    @classmethod
+    def to_command_string(cls, name: str, value: Any) -> str:
+        return ":v]" if value == FilterType.VIDEO.value else ":a]" if value == FilterType.AUDIO.value else ""
+
 
 @dataclass
 class FilterOption:
@@ -38,8 +42,9 @@ class Filter:
 
     def get_command(self):
         joined_params = ":".join(p.name + "=" + str(p.value) for p in self.params if p.value)
-        # if joined_params:  # if there was no option, leave empty string
-        #     joined_params = "=" + joined_params
+        if joined_params:  # if there was no option, leave empty string
+            joined_params = "=" + joined_params
+        filter_type_command = FilterType.to_command_string(self.command, self.filter_type)
         # if self.filter_type == "AVMEDIA_TYPE_VIDEO":
         #     return ":v]" + self.command + joined_params
         #
@@ -51,6 +56,7 @@ class Filter:
             "command": self.command,
             "params": joined_params,
             "filter_type": self.filter_type,
+            "filter_type_command": filter_type_command,
         }
         return command_dict
 
@@ -173,36 +179,41 @@ class FilterParser:
     def generate_command(self, stream: Stream) -> str:  # type: ignore
         last = "None"
         for node in stream._nodes:
+            command_dict = node.get_command()
+            command = command_dict.get("command")
+            filter_type_command = command_dict.get("filter_type_command")
+            params = command_dict.get("params")
+
             # many inputs one output
-            if (command_dict := node.get_command()) and any(filter_ in command_dict["command"] for filter_ in self.multi_input):
+            if any(filter_ in command for filter_ in self.multi_input):
                 last_results = []
-                command = command_dict["command"]
                 for graph in node._in:  # type: ignore
                     last_results.append(self.generate_command(graph))  # type: ignore
                 results = "".join([f"[{result}]" for result in last_results])
-                self.filters.append(f"{results}{command}[v{self.result_counter}];")
+                self.filters.append(f"{results}{filter_type_command}{command}{params}[v{self.result_counter}];")
                 last = f"v{self.result_counter}"
                 self.result_counter += 1
             # input
             elif isinstance(node, SourceFilter):
-                self.inputs.append(f"{command_dict['command']}")
+                self.inputs.append(f"{command}")
                 last = self.inputs_counter
                 self.inputs_counter += 1
                 continue
             # output
             elif isinstance(node, SinkFilter):
-                map_cmd, file = command_dict["command"].split(" ")
+                map_cmd, file = command.split(" ")
                 self.outputs.append(f"{map_cmd} [{last}] {file}")
                 self.outputs_counter += 1
                 continue
             # single input single output
             else:
                 if isinstance(last, int):
-                    self.filters.append(f"[{last}]{command_dict['command']}={command_dict['params']}[v{self.result_counter}];")
+                    self.filters.append(f"[{last}{filter_type_command}{command}{params}[v{self.result_counter}];")
                 else:
-                    self.filters.append(f"[{last}]{command_dict['command']}={command_dict['params']}[v{self.result_counter}];")
+                    self.filters.append(f"[{last}{filter_type_command}{command}{params}[v{self.result_counter}];")
                 last = f"v{self.result_counter}"
                 self.result_counter += 1
+
         if len(self.filters) == 0 and len(stream._nodes) != 1:  # case of single input is allowed for overlay
             raise ValueError("No filters selected")
         return last
