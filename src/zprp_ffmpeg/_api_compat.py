@@ -15,8 +15,8 @@ from .process_connector import ProcessConnector
 
 
 # this one is unique, creates the Stream object
-def input(filename: str) -> Stream:
-    source = SourceFilter(filename)
+def input(filename: str, **kwargs) -> Stream:
+    source = SourceFilter(filename, **kwargs)
     return Stream().append(source)
 
 

@@ -6,7 +6,7 @@ import zprp_ffmpeg.filter_graph
 work_dir = Path(__file__).parent
 
 
-stream = zprp_ffmpeg.input(str(work_dir / "input.mp4"))
+stream = zprp_ffmpeg.input(str(work_dir / "input.mp4"), t=5)
 stream = zprp_ffmpeg.fade(stream, type="in", start_frame=0, nb_frames=30)
 stream = zprp_ffmpeg.concat((stream, stream))
 stream = zprp_ffmpeg.output(stream, str(work_dir / "output.mp4"))

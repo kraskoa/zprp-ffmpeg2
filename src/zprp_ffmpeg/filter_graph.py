@@ -7,6 +7,7 @@ from typing import Any
 from typing import List
 from typing import Optional
 from typing import Union
+from typing import Dict
 
 
 class FilterType(Enum):
@@ -58,9 +59,10 @@ class Filter:
 class SourceFilter:
     """There can't be any input node to input filter, it provides the input itself."""
 
-    def __init__(self, in_path: str):
+    def __init__(self, in_path: str, **kwargs):
         self.in_path: str = in_path
         self._out: List[AnyNode] = []
+        self.kwargs = kwargs
 
     def add_output(self, parent: "Filter | SinkFilter"):
         self._out.append(parent)
@@ -70,6 +72,7 @@ class SourceFilter:
 
     def get_command(self):
         return {
+            "kwargs": convert_kwargs_to_cmd_args(self.kwargs),
             "command": "",
             "file": self.in_path,
             "params": "",
@@ -158,7 +161,8 @@ class FilterParser:
                 self.result_counter += 1
             # input
             elif isinstance(node, SourceFilter):
-                self.inputs.append(f"{i_cmd} {file}")
+                kwargs = command_dict.get("kwargs")
+                self.inputs.append(f"{kwargs} {i_cmd} {file}")
                 last = self.inputs_counter
                 self.inputs_counter += 1
                 continue
@@ -191,3 +195,11 @@ class FilterParser:
             + " "
             + " ".join(stream.global_options)
         )
+
+
+def convert_kwargs_to_cmd_args(kwargs: Dict[str, Any]) -> str:
+    args = []
+    for k, v in kwargs.items():
+        args.append(f"-{k}")
+        args.append(str(v))
+    return " ".join(args)
