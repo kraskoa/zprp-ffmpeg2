@@ -14,7 +14,7 @@ class FilterType(Enum):
     AUDIO = "AVMEDIA_TYPE_AUDIO"
 
     @classmethod
-    def to_command_string(cls, name: str, value: Any) -> str:
+    def to_command_string(cls, value: Any) -> str:
         return ":v]" if value == FilterType.VIDEO.value else ":a]" if value == FilterType.AUDIO.value else ""
 
 
@@ -44,7 +44,7 @@ class Filter:
         joined_params = ":".join(p.name + "=" + str(p.value) for p in self.params if p.value)
         if joined_params:  # if there was no option, leave empty string
             joined_params = "=" + joined_params
-        filter_type_command = FilterType.to_command_string(self.command, self.filter_type)
+        filter_type_command = FilterType.to_command_string(self.filter_type)
         command_dict = {
             "command": self.command,
             "params": joined_params,
