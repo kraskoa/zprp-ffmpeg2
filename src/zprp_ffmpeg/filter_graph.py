@@ -125,6 +125,11 @@ class Stream:
         self._nodes.append(node)
         return self  # fluent
 
+    def output(self, out_path: str) -> "Stream":
+        sink = SinkFilter(out_path)
+        self.append(sink)
+        return self
+
 
 class FilterParser:
     def __init__(self):

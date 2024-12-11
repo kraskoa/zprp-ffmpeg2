@@ -73,3 +73,10 @@ def run_async(stream: Stream) -> BaseConnector:
 def overwrite_output(stream: Stream) -> Stream:
     stream.global_options.append("-y")
     return stream
+
+def merge_outputs(streams: List[Stream], filename: str) -> Stream:
+    """Merges multiple outputs into a single file"""
+    concat = Filter("concat", filter_type=FilterType.VIDEO.value)
+    for s in streams:
+        concat.add_input(s)
+    return output(Stream().append(concat), filename)
