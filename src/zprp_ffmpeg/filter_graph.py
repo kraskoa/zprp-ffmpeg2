@@ -138,7 +138,6 @@ class FilterParser:
         self.outputs = []
         self.filters = []
 
-
     def generate_command(self, stream: Stream) -> str:  # type: ignore
         last = "None"
         for node in stream._nodes:
@@ -156,7 +155,7 @@ class FilterParser:
                 for graph in node._in:  # type: ignore
                     last_results.append(self.generate_command(graph))  # type: ignore
                 results = "".join([f"[{result}]" for result in last_results])
-                self.filters.append(f"{results}{filter_type_command}{command}{params}[v{self.result_counter}];")
+                self.filters.append(f"{results}{command}{params}[v{self.result_counter}];")
                 last = f"v{self.result_counter}"
                 self.result_counter += 1
             # input
@@ -176,7 +175,7 @@ class FilterParser:
                 if isinstance(last, int):
                     self.filters.append(f"[{last}{filter_type_command}{command}{params}[v{self.result_counter}];")
                 else:
-                    self.filters.append(f"[{last}{filter_type_command}{command}{params}[v{self.result_counter}];")
+                    self.filters.append(f"[{last}{command}{params}[v{self.result_counter}];")
                 last = f"v{self.result_counter}"
                 self.result_counter += 1
 
