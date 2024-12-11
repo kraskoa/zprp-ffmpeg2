@@ -15,7 +15,7 @@ class FilterType(Enum):
     AUDIO = "AVMEDIA_TYPE_AUDIO"
 
     @classmethod
-    def to_command_string(cls, name: str, value: Any) -> str:
+    def to_command_string(cls, value: Any) -> str:
         return ":v]" if value == FilterType.VIDEO.value else ":a]" if value == FilterType.AUDIO.value else ""
 
 
@@ -45,7 +45,7 @@ class Filter:
         joined_params = ":".join(p.name + "=" + str(p.value) for p in self.params if p.value)
         if joined_params:  # if there was no option, leave empty string
             joined_params = "=" + joined_params
-        filter_type_command = FilterType.to_command_string(self.command, self.filter_type)
+        filter_type_command = FilterType.to_command_string(self.filter_type)
         command_dict = {
             "command": self.command,
             "params": joined_params,
@@ -68,7 +68,9 @@ class SourceFilter:
         self._out.append(parent)
 
     def add_input(self, child: "Filter"):
-        raise NotImplementedError("This node can't have inputs")
+        if isinstance(child, MergeOutputFilter):
+            child.add_input(self)
+        raise NotImplementedError("This node can only have output of MergeOutputFilter")
 
     def get_command(self):
         return {
@@ -89,6 +91,32 @@ class SinkFilter:
 
     def add_input(self, parent: "Filter | SourceFilter"):
         self._in.append(parent)
+
+    def add_output(self, parent: "Filter"):
+        raise NotImplementedError("This node can't have outputs")
+
+    def get_command(self):
+        return {
+            "command": "",
+            "file": self.out_path,
+            "params": "",
+            "filter_type": "",
+        }
+
+
+class MergeOutputFilter:
+    """This node is used to merge multiple outputs into a single command."""
+
+    def __init__(self, out_path: str):
+        self.out_path: str = out_path
+        self._in: List[AnyNode] = []
+
+    def add_input(self, parent: "Filter | SourceFilter"):
+        self._in.append(parent)
+
+    def add_inputs(self, parents: List["Filter | SourceFilter"]):
+        for parent in parents:
+            self._in.append(parent)
 
     def add_output(self, parent: "Filter"):
         raise NotImplementedError("This node can't have outputs")
@@ -156,6 +184,7 @@ class FilterParser:
 
             # many inputs one output
             if any(filter_ in command for filter_ in self.multi_input):
+                self.filter_counter += 1
                 last_results = []
                 for graph in node._in:  # type: ignore
                     last_results.append(self.generate_command(graph))  # type: ignore
@@ -172,11 +201,15 @@ class FilterParser:
                 continue
             # output
             elif isinstance(node, SinkFilter):
-                self.outputs.append(f"{map_cmd} [{last}] {file}")
+                if self.filter_counter > 0:
+                    self.outputs.append(f"{map_cmd} [{last}] {file}")
+                else:
+                    self.outputs.append(f"{file}")
                 self.outputs_counter += 1
                 continue
             # single input single output
             else:
+                self.filter_counter += 1
                 if isinstance(last, int):
                     self.filters.append(f"[{last}{filter_type_command}{command}{params}[v{self.result_counter}];")
                 else:
@@ -184,12 +217,14 @@ class FilterParser:
                 last = f"v{self.result_counter}"
                 self.result_counter += 1
 
-        if len(self.filters) == 0 and len(stream._nodes) != 1:  # case of single input is allowed for overlay
-            raise ValueError("No filters selected")
+        # if len(self.filters) == 0 and len(stream._nodes) != 1:  # case of single input is allowed for overlay
+        #     raise ValueError("No filters selected")
         return last
 
     def generate_result(self, stream: Stream) -> str:
         self.generate_command(stream)
+        if self.filter_counter == 0:
+            return " ".join(self.inputs) + " " + " ".join(self.outputs) + " ".join(stream.global_options)
         return (
             " ".join(self.inputs)
             + ' -filter_complex "'

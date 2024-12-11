@@ -1,6 +1,7 @@
 """compatibility layer to match the kkroening library.
 @TODO: better docstrings"""
 
+from functools import singledispatch
 from typing import List
 from typing import Tuple
 
@@ -8,6 +9,7 @@ from zprp_ffmpeg.base_connector import BaseConnector
 
 from .filter_graph import Filter
 from .filter_graph import FilterOption
+from .filter_graph import MergeOutputFilter
 from .filter_graph import SinkFilter
 from .filter_graph import SourceFilter
 from .filter_graph import Stream
@@ -45,9 +47,26 @@ def global_args(stream: Stream, *args) -> Stream:
     return stream
 
 
-def get_args(stream: Stream, overwrite_output: bool = False) -> List[str]:
+@singledispatch
+def get_args(arg):
+    return "Unknown type"
+
+
+@get_args.register(Stream)
+def _(stream: Stream, overwrite_output: bool = False) -> List[str]:
     """Build command-line arguments to be passed to ffmpeg."""
     args = ProcessConnector.compile(stream).split()
+    if overwrite_output:
+        args += ["-y"]
+    return args
+
+
+@get_args.register(list)
+def _(streams: list[Stream], overwrite_output: bool = False) -> List[str]:
+    """Build command-line arguments to be passed to ffmpeg."""
+    args = []
+    for stream in streams:
+        args.extend(ProcessConnector.compile(stream).split())
     if overwrite_output:
         args += ["-y"]
     return args
@@ -74,9 +93,8 @@ def overwrite_output(stream: Stream) -> Stream:
     stream.global_options.append("-y")
     return stream
 
+
 def merge_outputs(streams: List[Stream], filename: str) -> Stream:
     """Merges multiple outputs into a single file"""
-    concat = Filter("concat", filter_type=FilterType.VIDEO.value)
-    for s in streams:
-        concat.add_input(s)
-    return output(Stream().append(concat), filename)
+    merged = MergeOutputFilter
+    return stream

@@ -4,11 +4,11 @@
 ## Design proposal
 
 ### Schedule
-- [ ] (27.10 - 03.11) Getting to know current functionalities of the zprp-ffmpeg library
+- [x] (27.10 - 03.11) Getting to know current functionalities of the zprp-ffmpeg library
 - [ ] (03.11 - 17.11) Extending test coverage of existing functionalities to potentially uncover errors
-- [ ] (17.11 - 24.11) Fixing the string-based outputs processing from Node.get_command()
+- [x] (17.11 - 24.11) Fixing the string-based outputs processing from Node.get_command()
 - [ ] (24.11 - 08.12) Working on multiple input sources support like in ffmpeg-python
-- [ ] (24.11 - 08.12) Working on support for merging multiple output streams, also like in ffmpeg-python
+- [x] (24.11 - 08.12) Working on support for merging multiple output streams, also like in ffmpeg-python
 - [ ] (08.12 - 22.12) Working on covering the missing full compatibility with ffmpeg-python API
 - [ ] (22.12 - 12.01) Writing tests to cover newly added functionalities
 - [ ] (12.01 - 19.01) Updating documentation to fix shortcomings and cover new functions

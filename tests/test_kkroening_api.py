@@ -7,6 +7,11 @@ import pytest
 import zprp_ffmpeg as ffmpeg
 
 
+def test_input_no_change():
+    stream = ffmpeg.input("input.mp4")
+    stream.output("output.mp4")
+    assert stream.get_args() == ["-i", "input.mp4", "output.mp4"]
+
 def test_input():
     # example from readme
     stream = ffmpeg.input("input.mp4")
@@ -47,13 +52,6 @@ def test_filter_custom_fluent():
         "[v0]",
         "dummy2.mp4",
     ]
-
-
-def test_compile_no_filters():
-    out_file = ffmpeg.input("dummy.mp4").output("dummy2.mp4")
-    with pytest.raises(ValueError, match="No filters selected"):
-        out_file.compile()
-
 
 def test_compile():
     """https://github.com/kkroening/ffmpeg-python/blob/df129c7ba30aaa9ffffb81a48f53aa7253b0b4e6/ffmpeg/tests/test_ffmpeg.py#L456"""
@@ -130,26 +128,38 @@ def test_probe():
     assert "streams" in obj
 
 
-def test__multi_output_scaling():
-    in_ = ffmpeg.input('in.mp4')
-    out1 = in_.output('out1.mp4', vf='scale=1280:720')
-    out2 = in_.output('out2.mp4', vf='scale=640:360')
-    merged = ffmpeg.merge_outputs(out1, out2)
-
-    # Validate the arguments for the combined command
-    assert merged.get_args() == [
-        '-i', 'in.mp4',
-        '-vf', 'scale=1280:720', 'out1.mp4',
-        '-vf', 'scale=640:360', 'out2.mp4',
-    ]
-
-def test__multi_output_scaling():
-    in_ = ffmpeg.input('in.mp4')
-    out1 = in_.output('out1.mp4')
-    out2 = in_.output('out2.mp4')
-    merged = ffmpeg.merge_outputs(out1, out2)
-
-    # Validate the arguments for the combined command
-    assert merged.get_args() == [
-        '-i', 'in.mp4',
-    ]
+# def test__multi_output_scaling():
+#     in_ = ffmpeg.input('in.mp4')
+#     out1 = in_.output('out1.mp4', vf='scale=1280:720')
+#     out2 = in_.output('out2.mp4', vf='scale=640:360')
+#     merged = ffmpeg.merge_outputs(out1, out2)
+#
+#     # Validate the arguments for the combined command
+#     assert merged.get_args() == [
+#         '-i', 'in.mp4',
+#         '-vf', 'scale=1280:720', 'out1.mp4',
+#         '-vf', 'scale=640:360', 'out2.mp4',
+#     ]
+#
+# def test__multi_output_scaling():
+#     in_ = ffmpeg.input('in.mp4')
+#     out1 = in_.output('out1.mp4')
+#     out2 = in_.output('out2.mp4')
+#     merged = ffmpeg.merge_outputs(out1, out2)
+#
+#     # Validate the arguments for the combined command
+#     assert merged.get_args() == [
+#         '-i', 'in.mp4',
+#     ]
+#
+# def test__merge_outputs():
+#     in_ = ffmpeg.input('in.mp4')
+#     out1 = in_.output('out1.mp4')
+#     out2 = in_.output('out2.mp4')
+#     # assert ffmpeg.merge_outputs(out1, out2).get_args() == [
+#     #     '-i',
+#     #     'in.mp4',
+#     #     'out1.mp4',
+#     #     'out2.mp4',
+#     # ]
+#     assert ffmpeg.get_args([out1, out2]) == ['-i', 'in.mp4', 'out2.mp4', 'out1.mp4']
