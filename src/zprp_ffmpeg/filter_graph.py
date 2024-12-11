@@ -4,10 +4,10 @@ It slightly violates DRY, but the parameter types are different. It is what it i
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any
+from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Union
-from typing import Dict
 
 
 class FilterType(Enum):
