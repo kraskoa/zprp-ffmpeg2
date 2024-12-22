@@ -24,6 +24,15 @@ class FilterOption:
     value: Any
 
 
+@dataclass
+class ComplexCommand:
+    command: str
+    file: Optional[str] = None
+    params: str = ""
+    filter_type: str = ""
+    filter_type_command: str = ""
+
+
 class Filter:
     """Filters can have many inputs and many outputs, holds the filter name and potential params"""
 
@@ -40,18 +49,17 @@ class Filter:
     def add_input(self, child: "Filter | SourceFilter | Stream"):
         self._in.append(child)
 
-    def get_command(self):
+    def get_command(self) -> ComplexCommand:
         joined_params = ":".join(p.name + "=" + str(p.value) for p in self.params if p.value)
         if joined_params:  # if there was no option, leave empty string
             joined_params = "=" + joined_params
         filter_type_command = FilterType.to_command_string(self.filter_type)
-        command_dict = {
-            "command": self.command,
-            "params": joined_params,
-            "filter_type": self.filter_type,
-            "filter_type_command": filter_type_command,
-        }
-        return command_dict
+        return ComplexCommand(
+            command=self.command,
+            params=joined_params,
+            filter_type=self.filter_type,
+            filter_type_command=filter_type_command,
+        )
 
 
 # names as per ffmpeg documentation
@@ -68,13 +76,11 @@ class SourceFilter:
     def add_input(self, child: "Filter"):
         raise NotImplementedError("This node can't have inputs")
 
-    def get_command(self):
-        return {
-            "command": self.in_path,
-            "file": self.in_path,
-            "params": "",
-            "filter_type": "",
-        }
+    def get_command(self) -> ComplexCommand:
+        return ComplexCommand(
+            command=self.in_path,
+            file=self.in_path,
+        )
 
 
 class SinkFilter:
@@ -90,13 +96,11 @@ class SinkFilter:
     def add_output(self, parent: "Filter"):
         raise NotImplementedError("This node can't have outputs")
 
-    def get_command(self):
-        return {
-            "command": self.out_path,
-            "file": self.out_path,
-            "params": "",
-            "filter_type": "",
-        }
+    def get_command(self) -> ComplexCommand:
+        return ComplexCommand(
+            command=self.out_path,
+            file=self.out_path,
+        )
 
 
 # in python 3.12 there is 'type' keyword, but we are targetting 3.8
@@ -138,13 +142,13 @@ class FilterParser:
     def generate_command(self, stream: Stream) -> str:  # type: ignore
         last = "None"
         for node in stream._nodes:
-            command_dict = node.get_command()
-            command = command_dict.get("command")
-            filter_type_command = command_dict.get("filter_type_command")
-            params = command_dict.get("params")
+            command_obj = node.get_command()
+            command = command_obj.command
+            filter_type_command = command_obj.filter_type_command
+            params = command_obj.params
             map_cmd = "-map"
             i_cmd = "-i"
-            file = command_dict.get("file")
+            file = command_obj.file
 
             # many inputs one output
             if any(filter_ in command for filter_ in self.multi_input):
