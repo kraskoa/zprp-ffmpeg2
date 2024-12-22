@@ -94,7 +94,6 @@ def overwrite_output(stream: Stream) -> Stream:
     return stream
 
 
-def merge_outputs(streams: List[Stream], filename: str) -> Stream:
-    """Merges multiple outputs into a single file"""
-    merged = MergeOutputFilter
-    return stream
+def merge_outputs(*streams: Stream) -> Stream:
+    """Include all given outputs in one ffmpeg command line"""
+    return Stream().append(MergeOutputFilter(streams))

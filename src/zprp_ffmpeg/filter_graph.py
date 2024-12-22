@@ -68,9 +68,7 @@ class SourceFilter:
         self._out.append(parent)
 
     def add_input(self, child: "Filter"):
-        if isinstance(child, MergeOutputFilter):
-            child.add_input(self)
-        raise NotImplementedError("This node can only have output of MergeOutputFilter")
+        raise NotImplementedError("This node can only have output")
 
     def get_command(self):
         return {
@@ -92,7 +90,9 @@ class SinkFilter:
     def add_input(self, parent: "Filter | SourceFilter"):
         self._in.append(parent)
 
-    def add_output(self, parent: "Filter"):
+    def add_output(self, parent: "Filter | MergeOutputFilter"):
+        if isinstance(parent, MergeOutputFilter):
+            parent.add_output(self)
         raise NotImplementedError("This node can't have outputs")
 
     def get_command(self):
@@ -102,38 +102,11 @@ class SinkFilter:
             "params": "",
             "filter_type": "",
         }
-
-
-class MergeOutputFilter:
-    """This node is used to merge multiple outputs into a single command."""
-
-    def __init__(self, out_path: str):
-        self.out_path: str = out_path
-        self._in: List[AnyNode] = []
-
-    def add_input(self, parent: "Filter | SourceFilter"):
-        self._in.append(parent)
-
-    def add_inputs(self, parents: List["Filter | SourceFilter"]):
-        for parent in parents:
-            self._in.append(parent)
-
-    def add_output(self, parent: "Filter"):
-        raise NotImplementedError("This node can't have outputs")
-
-    def get_command(self):
-        return {
-            "command": "",
-            "file": self.out_path,
-            "params": "",
-            "filter_type": "",
-        }
-
 
 # in python 3.12 there is 'type' keyword, but we are targetting 3.8
 # https://stackoverflow.com/questions/76712720/typeerror-unsupported-operand-types-for-type-and-nonetype
 # python >3.9 uses , instead of | idk if it works with python 3.12
-AnyNode = Union[Filter, SourceFilter, SinkFilter]
+AnyNode = Union[Filter, SourceFilter, SinkFilter, MergeOutputFilter]
 
 
 class Stream:
@@ -235,6 +208,33 @@ class FilterParser:
             + " ".join(stream.global_options)
         )
 
+class MergeOutputFilter:
+    """This node is used to merge multiple outputs into a single command."""
+
+    def __init__(self, streams: List[Stream]):
+        self.streams = streams
+        self.out_path = [stream for stream in streams]
+        self._in: List[AnyNode] = []
+
+    def add_input(self, parent: "SinkFilter"):
+        self._in.append(parent)
+
+    def add_inputs(self, parents: List["SinkFilter"]):
+        for parent in parents:
+            self._in.append(parent)
+
+    def add_output(self, parent: "Filter"):
+        raise NotImplementedError("This node can't have outputs")
+
+    def get_command(self):
+        return {
+            "command": "",
+            "file": self.out_path,
+            "params": "",
+            "filter_type": "",
+        }
+
+
 
 def convert_kwargs_to_cmd_args(kwargs: Dict[str, Any]) -> str:
     args = []
@@ -242,3 +242,5 @@ def convert_kwargs_to_cmd_args(kwargs: Dict[str, Any]) -> str:
         args.append(f"-{k}")
         args.append(str(v))
     return " ".join(args)
+
+
