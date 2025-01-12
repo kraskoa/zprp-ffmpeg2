@@ -1,27 +1,23 @@
 import zprp_ffmpeg as ffmpeg
 from zprp_ffmpeg.filter_graph import Filter
 from zprp_ffmpeg.filter_graph import FilterOption
-from zprp_ffmpeg.filter_graph import FilterType
 
 
 def test_filter_build_command_no_opts():
-    f = Filter("hflip", filter_type=FilterType.VIDEO.value)
-    assert f.get_command() == {
-        "command": "hflip",
-        "params": "",
-        "filter_type": "AVMEDIA_TYPE_VIDEO",
-        "filter_type_command": ":v]",
-    }
-
+    f = Filter(command="hflip")
+    command = f.get_command()
+    assert command.command == "hflip"
+    assert command.params == ""
+    assert command.filter_type == "AVMEDIA_TYPE_VIDEO"
+    assert command.filter_type_command == ":v]"
 
 def test_filter_build_command_with_opts():
-    f = Filter("scale", filter_type=FilterType.VIDEO.value, params=[FilterOption("w", "20"), FilterOption("h", "40")])
-    assert f.get_command() == {
-        "command": "scale",
-        "params": "=w=20:h=40",
-        "filter_type": "AVMEDIA_TYPE_VIDEO",
-        "filter_type_command": ":v]",
-    }
+    f = Filter(command="scale", params=[FilterOption(name="w", value=20), FilterOption(name="h", value=40)])
+    command = f.get_command()
+    assert command.command == "scale"
+    assert command.params == "=w=20:h=40"
+    assert command.filter_type == "AVMEDIA_TYPE_VIDEO"
+    assert command.filter_type_command == ":v]"
 
 def test_concat():
     g1 = ffmpeg.input("in1.mp4")
