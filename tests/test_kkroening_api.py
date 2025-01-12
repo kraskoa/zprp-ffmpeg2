@@ -128,6 +128,7 @@ def test_probe():
     assert "streams" in obj
 
 
+
 # def test__multi_output_scaling():
 #     in_ = ffmpeg.input('in.mp4')
 #     out1 = in_.output('out1.mp4', vf='scale=1280:720')
@@ -142,14 +143,14 @@ def test_probe():
 #     ]
 #
 def test__multi_output_scaling():
-    in_ = ffmpeg.input('in.mp4')
-    out1 = in_.output('out1.mp4')
-    out2 = in_.output('out2.mp4')
+    in_ = ffmpeg.input("in.mp4")
+    out1 = in_.output("out1.mp4")
+    out2 = in_.output("out2.mp4")
     merged = ffmpeg.merge_outputs(out1, out2)
 
     # Validate the arguments for the combined command
     assert merged.get_args() == [
-        '-i', 'in.mp4',
+        "-i", "in.mp4",
     ]
 #
 # def test__merge_outputs():

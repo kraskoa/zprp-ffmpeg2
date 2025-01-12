@@ -26,11 +26,12 @@ class FilterOption:
 
 @dataclass
 class ComplexCommand:
-    command: str
+    command: str = ""
     file: Optional[str] = None
     params: str = ""
     filter_type: str = ""
     filter_type_command: str = ""
+    kwargs: str = ""
 
 
 class Filter:
@@ -79,9 +80,10 @@ class SourceFilter:
 
     def get_command(self) -> ComplexCommand:
         return ComplexCommand(
-            command=self.in_path,
+            kwargs=convert_kwargs_to_cmd_args(self.kwargs),
             file=self.in_path,
         )
+
     # def get_command(self):
     #     return {
     #         "kwargs": convert_kwargs_to_cmd_args(self.kwargs),
@@ -109,9 +111,9 @@ class SinkFilter:
 
     def get_command(self) -> ComplexCommand:
         return ComplexCommand(
-            command=self.out_path,
             file=self.out_path,
         )
+
     # def get_command(self):
     #     return {
     #         "command": "",
@@ -144,10 +146,10 @@ class Stream:
         self._nodes.append(node)
         return self  # fluent
 
-    # def output(self, out_path: str) -> "Stream":
-    #     sink = SinkFilter(out_path)
-    #     self.append(sink)
-    #     return self
+    def output(self, out_path: str) -> "Stream":
+        sink = SinkFilter(out_path)
+        self.append(sink)
+        return self
 
 
 class FilterParser:
@@ -184,18 +186,13 @@ class FilterParser:
                 self.result_counter += 1
             # input
             elif isinstance(node, SourceFilter):
-                # kwargs = command_dict.get("kwargs")
+                kwargs = command_obj.kwargs
                 self.inputs.append(f"{kwargs} {i_cmd} {file}")
                 last = self.inputs_counter
                 self.inputs_counter += 1
                 continue
             # output
             elif isinstance(node, SinkFilter):
-                # if self.filter_counter > 0:
-                #     self.outputs.append(f"{map_cmd} [{last}] {file}")
-                # else:
-                #     self.outputs.append(f"{file}")
-
                 self.outputs.append(f"{map_cmd} [{last}] {file}")
                 self.outputs_counter += 1
                 continue
@@ -208,6 +205,7 @@ class FilterParser:
                 last = f"v{self.result_counter}"
                 self.result_counter += 1
 
+        # TODO not throw error if there are no filters, but only inputs and outputs
         if len(self.filters) == 0 and len(stream._nodes) != 1:  # case of single input is allowed for overlay
             raise ValueError("No filters selected")
         return last
@@ -224,39 +222,37 @@ class FilterParser:
             + " ".join(stream.global_options)
         )
 
-# class MergeOutputFilter:
-#     """This node is used to merge multiple outputs into a single command."""
-#
-#     def __init__(self, streams: List[Stream]):
-#         self.streams = streams
-#         self.out_path = [stream for stream in streams]
-#         self._in: List[AnyNode] = []
-#
-#     def add_input(self, parent: "SinkFilter"):
-#         self._in.append(parent)
-#
-#     def add_inputs(self, parents: List["SinkFilter"]):
-#         for parent in parents:
-#             self._in.append(parent)
-#
-#     def add_output(self, parent: "Filter"):
-#         raise NotImplementedError("This node can't have outputs")
-#
-#     def get_command(self):
-#         return {
-#             "command": "",
-#             "file": self.out_path,
-#             "params": "",
-#             "filter_type": "",
-#         }
-#
-#
-#
-# def convert_kwargs_to_cmd_args(kwargs: Dict[str, Any]) -> str:
-#     args = []
-#     for k, v in kwargs.items():
-#         args.append(f"-{k}")
-#         args.append(str(v))
-#     return " ".join(args)
+
+class MergeOutputFilter:
+    """This node is used to merge multiple outputs into a single command."""
+
+    def __init__(self, streams: List[Stream]):
+        self.streams = streams
+        self.out_path = [stream for stream in streams]
+        self._in: List[AnyNode] = []
+
+    def add_input(self, parent: "SinkFilter"):
+        self._in.append(parent)
+
+    def add_inputs(self, parents: List["SinkFilter"]):
+        for parent in parents:
+            self._in.append(parent)
+
+    def add_output(self, parent: "Filter"):
+        raise NotImplementedError("This node can't have outputs")
+
+    def get_command(self) -> ComplexCommand:
+        return ComplexCommand(
+            command="",
+            file=str(self.out_path),
+            params="",
+            filter_type="",
+        )
 
 
+def convert_kwargs_to_cmd_args(kwargs: Dict[str, Any]) -> str:
+    args = []
+    for k, v in kwargs.items():
+        args.append(f"-{k}")
+        args.append(str(v))
+    return " ".join(args)
