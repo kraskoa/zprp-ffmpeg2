@@ -4,6 +4,7 @@ It slightly violates DRY, but the parameter types are different. It is what it i
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any
+from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Union
@@ -14,7 +15,7 @@ class FilterType(Enum):
     AUDIO = "AVMEDIA_TYPE_AUDIO"
 
     @classmethod
-    def to_command_string(cls, name: str, value: Any) -> str:
+    def to_command_string(cls, value: Any) -> str:
         return ":v]" if value == FilterType.VIDEO.value else ":a]" if value == FilterType.AUDIO.value else ""
 
 
@@ -126,7 +127,7 @@ class SinkFilter:
 # in python 3.12 there is 'type' keyword, but we are targetting 3.8
 # https://stackoverflow.com/questions/76712720/typeerror-unsupported-operand-types-for-type-and-nonetype
 # python >3.9 uses , instead of | idk if it works with python 3.12
-AnyNode = Union[Filter, SourceFilter, SinkFilter, MergeOutputFilter]
+AnyNode = Union[Filter, SourceFilter, SinkFilter]
 
 
 class Stream:
@@ -150,6 +151,40 @@ class Stream:
         sink = SinkFilter(out_path)
         self.append(sink)
         return self
+
+class MergeOutputFilter:
+    """This node is used to merge multiple outputs into a single command."""
+
+    def __init__(self, streams: List[Stream]):
+        self.streams = streams
+        self._in: List[AnyNode] = []
+
+    def add_input(self, parent: "SinkFilter"):
+        self._in.append(parent)
+
+    def add_inputs(self, parents: List["SinkFilter"]):
+        for parent in parents:
+            self._in.append(parent)
+
+    def add_output(self, parent: "Filter"):
+        raise NotImplementedError("This node can't have outputs")
+
+    def get_command(self) -> ComplexCommand:
+        inputs = []
+        outputs = []
+        for stream in self.streams:
+            for node in stream._nodes:
+                command = node.get_command()
+                if isinstance(node, SourceFilter):
+                    inputs.append(f"-i {command.file}")
+                elif isinstance(node, SinkFilter):
+                    outputs.append(command.file)
+        return ComplexCommand(
+            command="",
+            file=" ".join(inputs + outputs),
+            params="",
+            filter_type="",
+        )
 
 
 class FilterParser:
@@ -197,6 +232,11 @@ class FilterParser:
                 self.outputs_counter += 1
                 continue
             # single input single output
+                # merge output
+            elif isinstance(node, MergeOutputFilter):
+                for sub_stream in node.streams:
+                    self.generate_command(sub_stream)
+                continue
             else:
                 if isinstance(last, int):
                     self.filters.append(f"[{last}{filter_type_command}{command}{params}[v{self.result_counter}];")
@@ -220,33 +260,6 @@ class FilterParser:
             + " ".join(self.outputs)
             + " "
             + " ".join(stream.global_options)
-        )
-
-
-class MergeOutputFilter:
-    """This node is used to merge multiple outputs into a single command."""
-
-    def __init__(self, streams: List[Stream]):
-        self.streams = streams
-        self.out_path = [stream for stream in streams]
-        self._in: List[AnyNode] = []
-
-    def add_input(self, parent: "SinkFilter"):
-        self._in.append(parent)
-
-    def add_inputs(self, parents: List["SinkFilter"]):
-        for parent in parents:
-            self._in.append(parent)
-
-    def add_output(self, parent: "Filter"):
-        raise NotImplementedError("This node can't have outputs")
-
-    def get_command(self) -> ComplexCommand:
-        return ComplexCommand(
-            command="",
-            file=str(self.out_path),
-            params="",
-            filter_type="",
         )
 
 

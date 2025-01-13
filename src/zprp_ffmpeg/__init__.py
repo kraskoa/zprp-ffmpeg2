@@ -9,6 +9,7 @@ from ._api_compat import filter
 from ._api_compat import get_args
 from ._api_compat import global_args
 from ._api_compat import input
+from ._api_compat import merge_outputs
 from ._api_compat import output
 from ._api_compat import overwrite_output
 from ._api_compat import run
@@ -37,6 +38,7 @@ __all__ = [
     "view",
     "generated_filters",
     "overwrite_output",
+    "merge_outputs",
 ]
 
 stream_modules = [generated_filters, _api_compat]  # noqa: F821

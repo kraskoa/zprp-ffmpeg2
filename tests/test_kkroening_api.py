@@ -114,7 +114,7 @@ def test_overwrite():
     stream = ffmpeg.input("something.avi")
     stream = ffmpeg.overwrite_output(stream)
     args = ffmpeg.get_args(stream)
-    assert "-y" in args # technically this test can pass when it shouldn't, but that's too nitpicky
+    assert "-y" in args # c
 
 def test_probe():
     with pytest.raises(Exception, match="ffprobe"):
@@ -142,25 +142,26 @@ def test_probe():
 #         '-vf', 'scale=640:360', 'out2.mp4',
 #     ]
 #
-def test__multi_output_scaling():
-    in_ = ffmpeg.input("in.mp4")
-    out1 = in_.output("out1.mp4")
-    out2 = in_.output("out2.mp4")
-    merged = ffmpeg.merge_outputs(out1, out2)
-
-    # Validate the arguments for the combined command
-    assert merged.get_args() == [
-        "-i", "in.mp4",
-    ]
+# def test__multi_output_scaling():
+#     in_ = ffmpeg.input("in.mp4")
+#     out1 = in_.output("out1.mp4")
+#     out2 = in_.output("out2.mp4")
+#     merged = ffmpeg.merge_outputs(out1, out2)
 #
-# def test__merge_outputs():
-#     in_ = ffmpeg.input('in.mp4')
-#     out1 = in_.output('out1.mp4')
-#     out2 = in_.output('out2.mp4')
-#     # assert ffmpeg.merge_outputs(out1, out2).get_args() == [
-#     #     '-i',
-#     #     'in.mp4',
-#     #     'out1.mp4',
-#     #     'out2.mp4',
-#     # ]
-#     assert ffmpeg.get_args([out1, out2]) == ['-i', 'in.mp4', 'out2.mp4', 'out1.mp4']
+#     # Validate the arguments for the combined command
+#     assert merged.get_args() == [
+#         "-i", "in.mp4",
+#     ]
+
+def test__merge_outputs():
+    in_ = ffmpeg.input('in.mp4')
+    in_ = ffmpeg.hflip(in_)
+    out1 = in_.output('out1.mp4')
+    out2 = in_.output('out2.mp4')
+    assert ffmpeg.merge_outputs(out1, out2).get_args() == [
+        '-i',
+        'in.mp4',
+        'out1.mp4',
+        'out2.mp4',
+    ]
+    assert ffmpeg.get_args([out1, out2]) == ['-i', 'in.mp4', 'out2.mp4', 'out1.mp4']
