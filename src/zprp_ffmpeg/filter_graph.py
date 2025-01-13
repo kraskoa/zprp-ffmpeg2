@@ -152,6 +152,7 @@ class Stream:
         self.append(sink)
         return self
 
+
 class MergeOutputFilter:
     """This node is used to merge multiple outputs into a single command."""
 
@@ -232,7 +233,7 @@ class FilterParser:
                 self.outputs_counter += 1
                 continue
             # single input single output
-                # merge output
+            # merge output
             elif isinstance(node, MergeOutputFilter):
                 for sub_stream in node.streams:
                     self.generate_command(sub_stream)
@@ -246,12 +247,14 @@ class FilterParser:
                 self.result_counter += 1
 
         # TODO not throw error if there are no filters, but only inputs and outputs
-        if len(self.filters) == 0 and len(stream._nodes) != 1:  # case of single input is allowed for overlay
+        if len(self.filters) == 0 and not all(isinstance(node, (SourceFilter, SinkFilter)) for node in stream._nodes):
             raise ValueError("No filters selected")
         return last
 
     def generate_result(self, stream: Stream) -> str:
         self.generate_command(stream)
+        if len(self.filters) == 0:
+            return " ".join(self.inputs) + " " + self.outputs[-1].split()[-1] + " " + " ".join(stream.global_options)
         return (
             " ".join(self.inputs)
             + ' -filter_complex "'

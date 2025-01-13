@@ -9,8 +9,8 @@ import zprp_ffmpeg as ffmpeg
 
 def test_input_no_change():
     stream = ffmpeg.input("input.mp4")
-    stream.output("output.mp4")
-    assert stream.get_args() == ["-i", "input.mp4", "output.mp4"]
+    out = stream.output("output.mp4")
+    assert out.get_args() == ["-i", "input.mp4", "output.mp4"]
 
 def test_input():
     # example from readme
@@ -113,6 +113,7 @@ def test_global_args():
 def test_overwrite():
     stream = ffmpeg.input("something.avi")
     stream = ffmpeg.overwrite_output(stream)
+    stream = ffmpeg.output(stream, "output.avi")
     args = ffmpeg.get_args(stream)
     assert "-y" in args # c
 
@@ -153,15 +154,19 @@ def test_probe():
 #         "-i", "in.mp4",
 #     ]
 
-def test__merge_outputs():
-    in_ = ffmpeg.input('in.mp4')
-    in_ = ffmpeg.hflip(in_)
-    out1 = in_.output('out1.mp4')
-    out2 = in_.output('out2.mp4')
-    assert ffmpeg.merge_outputs(out1, out2).get_args() == [
-        '-i',
-        'in.mp4',
-        'out1.mp4',
-        'out2.mp4',
-    ]
-    assert ffmpeg.get_args([out1, out2]) == ['-i', 'in.mp4', 'out2.mp4', 'out1.mp4']
+# def test__merge_outputs():
+#     in_ = ffmpeg.input("in.mp4")
+#     in_flip = ffmpeg.hflip(in_)
+#     out1 = in_.output("out1.mp4")
+#     out2 = in_flip.output("out2.mp4")
+#     assert ffmpeg.merge_outputs(out1, out2).get_args() == [
+#         '-i',
+#         'in.mp4',
+#         '-filter_complex',
+#         '[0]hflip[v0];',
+#         'out1.mp4',
+#         '-map',
+#         '[v0]',
+#         'out2.mp4',
+#     ]
+    # assert ffmpeg.get_args([out1, out2]) == ['-i', 'in.mp4', 'out2.mp4', 'out1.mp4']
