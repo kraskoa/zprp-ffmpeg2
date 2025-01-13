@@ -247,7 +247,7 @@ class FilterParser:
                 self.result_counter += 1
 
         if len(self.filters) == 0 and not all(isinstance(node, (SourceFilter, SinkFilter)) for node in stream._nodes):
-            raise ValueError("No filters selected")
+            return ""
         return last
 
     def generate_result(self, stream: Stream) -> str:
