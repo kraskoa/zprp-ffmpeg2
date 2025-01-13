@@ -7,11 +7,6 @@ import pytest
 import zprp_ffmpeg as ffmpeg
 
 
-def test_input_no_change():
-    stream = ffmpeg.input("input.mp4")
-    out = stream.output("output.mp4")
-    assert out.get_args() == ["-i", "input.mp4", "output.mp4"]
-
 def test_input():
     # example from readme
     stream = ffmpeg.input("input.mp4")

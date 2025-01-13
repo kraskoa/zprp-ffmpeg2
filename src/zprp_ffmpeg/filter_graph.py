@@ -246,7 +246,6 @@ class FilterParser:
                 last = f"v{self.result_counter}"
                 self.result_counter += 1
 
-        # TODO not throw error if there are no filters, but only inputs and outputs
         if len(self.filters) == 0 and not all(isinstance(node, (SourceFilter, SinkFilter)) for node in stream._nodes):
             raise ValueError("No filters selected")
         return last

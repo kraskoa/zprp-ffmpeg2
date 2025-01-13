@@ -3,6 +3,11 @@ from zprp_ffmpeg.filter_graph import Filter
 from zprp_ffmpeg.filter_graph import FilterOption
 
 
+def test_input_output_no_filter():
+    stream = ffmpeg.input("input.mp4")
+    out = stream.output("output.mp4")
+    assert out.get_args() == ["-i", "input.mp4", "output.mp4"]
+
 def test_filter_build_command_no_opts():
     f = Filter(command="hflip")
     command = f.get_command()
