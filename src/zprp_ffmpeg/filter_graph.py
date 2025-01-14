@@ -1,6 +1,7 @@
 """There is no general 'Node' class, because it doesn't work well with object relations, source and sink filters are kind of orthogonal.
 It slightly violates DRY, but the parameter types are different. It is what it is"""
 
+from copy import deepcopy
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any
@@ -66,14 +67,12 @@ class Filter:
 
 # names as per ffmpeg documentation
 class SourceFilter:
-    """There can't be any input node to input filter, it provides the input itself."""
-
     def __init__(self, in_path: str, **kwargs):
         self.in_path: str = in_path
-        self._out: List[AnyNode] = []
+        self._out: List[Union["Filter", "SinkFilter"]] = []
         self.kwargs = kwargs
 
-    def add_output(self, parent: "Filter | SinkFilter"):
+    def add_output(self, parent: Union["Filter", "SinkFilter"]):
         self._out.append(parent)
 
     def add_input(self, child: "Filter"):
@@ -85,43 +84,25 @@ class SourceFilter:
             file=self.in_path,
         )
 
-    # def get_command(self):
-    #     return {
-    #         "kwargs": convert_kwargs_to_cmd_args(self.kwargs),
-    #         "command": "",
-    #         "file": self.in_path,
-    #         "params": "",
-    #         "filter_type": "",
-    #     }
-
 
 class SinkFilter:
-    """Similarly to SourceFilter, it doesn't make sense to output anything further, this is the end of graph."""
-
     def __init__(self, out_path: str):
         self.out_path: str = out_path
-        self._in: List[AnyNode] = []
+        self._in: List[Union["Filter", "SourceFilter"]] = []
+        self._out: List[Union["Filter", "MergeOutputFilter"]] = []
 
-    def add_input(self, parent: "Filter | SourceFilter"):
+    def add_input(self, parent: Union["Filter", "SourceFilter"]):
         self._in.append(parent)
 
-    def add_output(self, parent: "Filter | MergeOutputFilter"):
-        if isinstance(parent, MergeOutputFilter):
-            parent.add_output(self)
+    def add_output(self, child: Union["Filter", "MergeOutputFilter"]):
+        if isinstance(child, MergeOutputFilter):
+            self._out.append(child)
         raise NotImplementedError("This node can't have outputs")
 
     def get_command(self) -> ComplexCommand:
         return ComplexCommand(
             file=self.out_path,
         )
-
-    # def get_command(self):
-    #     return {
-    #         "command": "",
-    #         "file": self.out_path,
-    #         "params": "",
-    #         "filter_type": "",
-    #     }
 
 
 # in python 3.12 there is 'type' keyword, but we are targetting 3.8
@@ -131,61 +112,54 @@ AnyNode = Union[Filter, SourceFilter, SinkFilter]
 
 
 class Stream:
-    """One directional sequence of nodes representing filters and data flow.
-    Multiple streams can interact through concat or overlay filters, the resulting graph can be viewed with `ffmpeg.view`."""
-
     def __init__(self) -> None:
-        self._nodes: List[AnyNode] = []
-        self.global_options: List = []
+        self._nodes: List[Union[Filter, SourceFilter, SinkFilter]] = []
+        self.global_options: List[str] = []
 
-    def append(self, node: AnyNode) -> "Stream":
-        if len(self._nodes) > 0:
-            # connect head with new node
-            if not isinstance(self._nodes[-1], SinkFilter) and not isinstance(node, SourceFilter):
-                self._nodes[-1].add_output(node)
-                node.add_input(self._nodes[-1])
-        self._nodes.append(node)
-        return self  # fluent
+    def append(self, node: Union[Filter, SourceFilter, SinkFilter]) -> "Stream":
+        # Create a deepcopy of the current instance
+        new_stream = deepcopy(self)
+        if len(new_stream._nodes) > 0:
+            # Connect the last node to the new one
+            if not isinstance(new_stream._nodes[-1], SinkFilter) and not isinstance(node, SourceFilter):
+                new_stream._nodes[-1].add_output(node)
+                node.add_input(new_stream._nodes[-1])
+        # Append the new node
+        new_stream._nodes.append(node)
+        return new_stream  # Return the new instance
 
     def output(self, out_path: str) -> "Stream":
+        # Add a SinkFilter and return a new Stream
         sink = SinkFilter(out_path)
-        self.append(sink)
-        return self
+        return self.append(sink)
 
 
 class MergeOutputFilter:
-    """This node is used to merge multiple outputs into a single command."""
-
     def __init__(self, streams: List[Stream]):
         self.streams = streams
-        self._in: List[AnyNode] = []
-
-    def add_input(self, parent: "SinkFilter"):
-        self._in.append(parent)
-
-    def add_inputs(self, parents: List["SinkFilter"]):
-        for parent in parents:
-            self._in.append(parent)
+        self._in: List[Union["Filter", "SourceFilter", "SinkFilter"]] = []
 
     def add_output(self, parent: "Filter"):
         raise NotImplementedError("This node can't have outputs")
 
+    def add_input(self, child: "Filter"):
+        raise NotImplementedError("This node can't have inputs")
+
     def get_command(self) -> ComplexCommand:
         inputs = []
+        seen_files = set()
         outputs = []
+
         for stream in self.streams:
             for node in stream._nodes:
-                command = node.get_command()
-                if isinstance(node, SourceFilter):
-                    inputs.append(f"-i {command.file}")
+                cmd = node.get_command()
+                if isinstance(node, SourceFilter) and cmd.file not in seen_files:
+                    inputs.extend(["-i", cmd.file])
+                    seen_files.add(cmd.file)
                 elif isinstance(node, SinkFilter):
-                    outputs.append(command.file)
-        return ComplexCommand(
-            command="",
-            file=" ".join(inputs + outputs),
-            params="",
-            filter_type="",
-        )
+                    outputs.append(cmd.file)
+
+        return ComplexCommand(file=" ".join(inputs + outputs))
 
 
 class FilterParser:
@@ -252,8 +226,23 @@ class FilterParser:
 
     def generate_result(self, stream: Stream) -> str:
         self.generate_command(stream)
+
+        if len(self.filters) == 0 and len(self.outputs) == 0:
+            merge_filter_node = None
+            for node in stream._nodes:
+                if isinstance(node, MergeOutputFilter):
+                    merge_filter_node = node
+                    break
+
+            if merge_filter_node:
+                cmd_string = merge_filter_node.get_command().file
+                return cmd_string
+
+            return " ".join(self.inputs) + " " + " ".join(stream.global_options)
+
         if len(self.filters) == 0:
             return " ".join(self.inputs) + " " + self.outputs[-1].split()[-1] + " " + " ".join(stream.global_options)
+
         return (
             " ".join(self.inputs)
             + ' -filter_complex "'

@@ -29,14 +29,14 @@ def filter(stream_spec: Stream, filter_name: str, *args, **kwargs) -> Stream:
         options.append(FilterOption(arg, None))
     for name, value in kwargs.items():
         options.append(FilterOption(name, value))
-    stream_spec.append(Filter(filter_name, params=options))
-    return stream_spec
+    new_stream = stream_spec.append(Filter(filter_name, params=options))
+    return new_stream
 
 
 def output(stream: Stream, filename: str) -> Stream:
     sink = SinkFilter(filename)
-    stream.append(sink)
-    return stream
+    new_stream = stream.append(sink)
+    return new_stream
 
 
 def global_args(stream: Stream, *args) -> Stream:
