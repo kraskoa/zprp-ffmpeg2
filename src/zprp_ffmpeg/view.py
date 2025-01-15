@@ -11,6 +11,7 @@ from typing import List
 import itertools
 import networkx as nx  # type: ignore
 from matplotlib import pyplot as plt  # type: ignore
+from collections import UserList, defaultdict
 
 
 class NodeColors(Enum):
@@ -25,21 +26,42 @@ class PrepNode:
     color: NodeColors
     path: str
 
-    def create_path_for_next(self):
+    def create_path_for_next(self) -> str:
         sep = ""
         if self.path:
             sep = ";"
         return f"{self.path}{sep}{self.name}"
 
-    def prev_node(self):
+    def prev_node(self) -> str:
         if not self.path:
             return None
         else:
             return self.path.split(";")[-1]
 
 
-def create_graph_connections(graph: Stream, previous: List[PrepNode]):
-    new_connections = []
+class PrepNodeList(UserList):
+    def __init__(self) -> None:
+        super().__init__()
+        self.counter = defaultdict(int)
+
+    def append(self, item) -> None:
+        if not isinstance(item, PrepNode):
+            raise ValueError(
+                "Only PrepNode object can be added to PrepNodeList"
+            )
+        if (item.name, item.path) not in [(element.name, element.path) for element in self.data]:
+            self.counter[item.name] += 1
+        if (c := self.counter[item.name]) > 1:
+            item = PrepNode(
+                f"{item.name}({c})",
+                item.color,
+                item.path
+            )
+        self.data.append(item)
+
+
+def create_graph_connections(graph: Stream, previous: List[PrepNode]) -> None:
+    new_connections = PrepNodeList()
     for node in graph._nodes:
         if isinstance(node, SourceFilter):
             new_connections.append(

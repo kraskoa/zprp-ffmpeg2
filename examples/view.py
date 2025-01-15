@@ -14,6 +14,8 @@ work_dir = Path(__file__).parent
 
 in_ = zprp_ffmpeg.input("in.mp4")
 stream = zprp_ffmpeg.hflip(in_)
+stream = zprp_ffmpeg.fade(stream, type="in", start_frame=0, nb_frames=30)
+stream = zprp_ffmpeg.hflip(stream)
 out1 = stream.output("out1.mp4")
 out2 = stream.output("out2.mp4")
 merged = zprp_ffmpeg.merge_outputs(out1, out2)
