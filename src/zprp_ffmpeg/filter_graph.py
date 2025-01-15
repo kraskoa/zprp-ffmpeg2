@@ -181,7 +181,7 @@ class FilterParser:
         self.result_counter = 0
         self.merge_counter = 0
 
-        self.inputs = set()
+        self.inputs = []
         self.outputs = []
         self.filters = []
 
@@ -208,7 +208,7 @@ class FilterParser:
             # input
             elif isinstance(node, SourceFilter):
                 kwargs = command_obj.kwargs
-                self.inputs.add(f"{kwargs} {i_cmd} {file}")
+                self.inputs.append(f"{kwargs} {i_cmd} {file}")
                 last = self.inputs_counter
                 self.inputs_counter += 1
                 continue
@@ -256,16 +256,10 @@ class FilterParser:
                     merge_filter_node = node
                     break
             if len(self.filters) == 0:
-                return (
-                    " ".join(self.inputs)
-                    + " "
-                    + " ".join(self.outputs)
-                    + " "
-                    + " ".join(stream.global_options)
-                )
+                return " ".join(set(self.inputs)) + " " + " ".join(self.outputs) + " " + " ".join(stream.global_options)
 
             return (
-                " ".join(self.inputs)
+                " ".join(set(self.inputs))
                 + ' -filter_complex "'
                 + " ".join(self.filters)[:-1]
                 + '" '

@@ -160,7 +160,7 @@ def test__merge_outputs_with_filters():
         "-i",
         "in.mp4",
         "-filter_complex",
-        "[0]hflip[v0];",
+        '"[0:v]hflip[v0]"',
         "out1.mp4",
         "-map",
         "[v0]",
