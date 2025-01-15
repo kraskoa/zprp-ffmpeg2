@@ -4302,8 +4302,8 @@ def hflip(
     graph: Stream,
 ):
     """Horizontally flip the input video."""
-    graph.append(Filter(command="hflip", filter_type="AVMEDIA_TYPE_VIDEO", params=[]))
-    return graph
+    new_graph = graph.append(Filter(command="hflip", filter_type="AVMEDIA_TYPE_VIDEO", params=[]))
+    return new_graph
 
 
 def afir(
@@ -6415,7 +6415,7 @@ def fade(
     :param int duration: Duration of the effect in seconds.
     :param str color: set color
     """
-    graph.append(
+    new_graph = graph.append(
         Filter(
             command="fade",
             filter_type="AVMEDIA_TYPE_VIDEO",
@@ -6430,7 +6430,7 @@ def fade(
             ],
         )
     )
-    return graph
+    return new_graph
 
 
 def freezeframes(graph: Stream, first: Optional[int] = None, last: Optional[int] = None, replace: Optional[int] = None):
