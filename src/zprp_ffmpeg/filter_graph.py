@@ -4,8 +4,9 @@ It slightly violates DRY, but the parameter types are different. It is what it i
 from copy import deepcopy
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Iterable
+from typing import Any
 from typing import Dict
+from typing import Iterable
 from typing import List
 from typing import Optional
 from typing import Union
@@ -160,10 +161,9 @@ class MergeOutputFilter:
                     outputs.append(cmd.file)
 
         return ComplexCommand(
-            kwargs=" ".join(inputs),   # Zawiera wszystkie wejścia, np. "-i in.mp4"
-            file=" ".join(outputs)     # Zawiera wszystkie wyjścia, np. "out1.mp4 out2.mp4"
+            kwargs=" ".join(inputs),  # Zawiera wszystkie wejścia, np. "-i in.mp4"
+            file=" ".join(outputs),  # Zawiera wszystkie wyjścia, np. "out1.mp4 out2.mp4"
         )
-
 
 
 class FilterParser:

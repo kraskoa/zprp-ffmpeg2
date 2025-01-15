@@ -34,8 +34,8 @@ filter_template = Template(
     """
 def $function_name(graph: Stream, $options):
     \"\"\"$description\"\"\"
-    graph.append(Filter(command="$function_name",filter_type="$filter_type",params=$params))
-    return graph
+    new_graph = graph.append(Filter(command="$function_name",filter_type="$filter_type",params=$params))
+    return new_graph
 """
 )
 
