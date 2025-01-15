@@ -4,7 +4,7 @@ It slightly violates DRY, but the parameter types are different. It is what it i
 from copy import deepcopy
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any
+from typing import Any, Iterable
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -135,7 +135,7 @@ class Stream:
 
 
 class MergeOutputFilter:
-    def __init__(self, streams: List[Stream]):
+    def __init__(self, streams: Iterable[Stream]):
         self.streams = streams
         self._in: List[Union["Filter", "SourceFilter", "SinkFilter"]] = []
 
@@ -159,7 +159,11 @@ class MergeOutputFilter:
                 elif isinstance(node, SinkFilter):
                     outputs.append(cmd.file)
 
-        return ComplexCommand(file=" ".join(inputs + outputs))
+        return ComplexCommand(
+            kwargs=" ".join(inputs),   # Zawiera wszystkie wejścia, np. "-i in.mp4"
+            file=" ".join(outputs)     # Zawiera wszystkie wyjścia, np. "out1.mp4 out2.mp4"
+        )
+
 
 
 class FilterParser:
@@ -169,6 +173,7 @@ class FilterParser:
         self.outputs_counter = 0
         self.filter_counter = 0
         self.result_counter = 0
+        self.merge_counter = 0
 
         self.inputs = []
         self.outputs = []
@@ -209,8 +214,11 @@ class FilterParser:
             # single input single output
             # merge output
             elif isinstance(node, MergeOutputFilter):
-                for sub_stream in node.streams:
-                    self.generate_command(sub_stream)
+                # for sub_stream in node.streams:
+                #     self.generate_command(sub_stream)
+                self.inputs.append(node.get_command().kwargs)
+                self.outputs.append(node.get_command().file)
+                self.merge_counter += 1
                 continue
             else:
                 if isinstance(last, int):
@@ -227,7 +235,7 @@ class FilterParser:
     def generate_result(self, stream: Stream) -> str:
         self.generate_command(stream)
 
-        if len(self.filters) == 0 and len(self.outputs) == 0:
+        if len(self.filters) == 0 and self.merge_counter == 1:
             merge_filter_node = None
             for node in stream._nodes:
                 if isinstance(node, MergeOutputFilter):
@@ -235,12 +243,11 @@ class FilterParser:
                     break
 
             if merge_filter_node:
-                cmd_string = merge_filter_node.get_command().file
-                return cmd_string
+                return " ".join(self.inputs) + " " + " ".join(self.outputs) + " ".join(stream.global_options)
 
             return " ".join(self.inputs) + " " + " ".join(stream.global_options)
 
-        if len(self.filters) == 0:
+        elif len(self.filters) == 0:
             return " ".join(self.inputs) + " " + self.outputs[-1].split()[-1] + " " + " ".join(stream.global_options)
 
         return (
