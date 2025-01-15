@@ -2969,9 +2969,9 @@ def setsar(graph: Stream, , sar: Optional[str] = None, max: Optional[int] = None
 
 def shuffleplanes(graph: Stream, , map0: Optional[int] = None, map1: Optional[int] = None, map2: Optional[int] = None, map3: Optional[int] = None):
     """Shuffle video planes.
-    :param int map0: Index of the input plane to be used as the first output plane 
-    :param int map1: Index of the input plane to be used as the second output plane 
-    :param int map2: Index of the input plane to be used as the third output plane 
+    :param int map0: Index of the input plane to be used as the first output plane
+    :param int map1: Index of the input plane to be used as the second output plane
+    :param int map2: Index of the input plane to be used as the third output plane
     :param int map3: Index of the input plane to be used as the fourth output plane """
     new_graph = graph.append(Filter(command="shuffleplanes", filter_type="AVMEDIA_TYPE_VIDEO", params=[FilterOption(name="map0", value=map0), FilterOption(name="map1", value=map1), FilterOption(name="map2", value=map2), FilterOption(name="map3", value=map3)]))
     return new_graph
@@ -4441,7 +4441,7 @@ def overlay(graph: Stream, , x: Optional[str] = None, y: Optional[str] = None, e
     """Overlay a video source on top of the input.
     :param str x: set the x expression
     :param str y: set the y expression
-    :param str eof_action: Action to take when encountering EOF from secondary input 
+    :param str eof_action: Action to take when encountering EOF from secondary input
         possible values: repeat, endall, pass
     :param str eval: specify when to evaluate expressions
         possible values: init, frame
