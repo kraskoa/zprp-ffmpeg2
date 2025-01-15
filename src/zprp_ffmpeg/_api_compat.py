@@ -64,9 +64,9 @@ def _(stream: Stream, overwrite_output: bool = False) -> List[str]:
 @get_args.register(list)
 def _(streams: list[Stream], overwrite_output: bool = False) -> List[str]:
     """Build command-line arguments to be passed to ffmpeg."""
-    args = []
-    for stream in streams:
-        args.extend(ProcessConnector.compile(stream).split())
+    streams.reverse()
+    new_stream = Stream().append(MergeOutputFilter(streams))
+    args = ProcessConnector.compile(new_stream).split()
     if overwrite_output:
         args += ["-y"]
     return args

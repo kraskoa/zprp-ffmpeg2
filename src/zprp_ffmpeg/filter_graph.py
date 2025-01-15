@@ -123,7 +123,7 @@ class Stream:
         self._nodes: List[Union[Filter, SourceFilter, SinkFilter]] = []
         self.global_options: List[str] = []
 
-    def append(self, node: Union[Filter, SourceFilter, SinkFilter]) -> "Stream":
+    def append(self, node: Union[Filter, SourceFilter, SinkFilter, "MergeOutputFilter"]) -> "Stream":
         # Create a deepcopy of the current instance
         new_stream = deepcopy(self)
         if len(new_stream._nodes) > 0:
