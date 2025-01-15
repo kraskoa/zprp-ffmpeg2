@@ -1,44 +1,110 @@
-from .filter_graph import Filter
-from .filter_graph import SinkFilter
-from .filter_graph import SourceFilter
-from .filter_graph import Stream
+from .filter_graph import (
+    Filter,
+    SinkFilter,
+    SourceFilter,
+    Stream,
+    MergeOutputFilter
+)
+from enum import Enum
+import dataclasses
+from typing import List
+import itertools
+import networkx as nx  # type: ignore
+from matplotlib import pyplot as plt  # type: ignore
 
 
-def view(graph: Stream, filename=None) -> None:
+class NodeColors(Enum):
+    INPUT = "#99cc00"
+    OUTPUT = "#99ccff"
+    FILTER = "#ffcc00"
+
+
+@dataclasses.dataclass(eq=True, frozen=True)
+class PrepNode:
+    name: str
+    color: NodeColors
+    path: str
+
+    def create_path_for_next(self):
+        sep = ""
+        if self.path:
+            sep = ";"
+        return f"{self.path}{sep}{self.name}"
+
+    def prev_node(self):
+        if not self.path:
+            return None
+        else:
+            return self.path.split(";")[-1]
+
+
+def create_graph_connections(graph: Stream, previous: List[PrepNode]):
+    new_connections = []
+    for node in graph._nodes:
+        if isinstance(node, SourceFilter):
+            new_connections.append(
+                PrepNode(
+                    node.in_path.split("/")[-1],
+                    NodeColors.INPUT.value,
+                    ""
+                )
+            )
+        elif isinstance(node, SinkFilter):
+            new_connections.append(
+                PrepNode(
+                    node.out_path.split("/")[-1],
+                    NodeColors.OUTPUT.value,
+                    new_connections[-1].create_path_for_next()
+                )
+            )
+        elif isinstance(node, Filter):
+            new_connections.append(
+                PrepNode(
+                    node.command,
+                    NodeColors.FILTER.value,
+                    new_connections[-1].create_path_for_next()
+                )
+            )
+        elif isinstance(node, MergeOutputFilter):
+            for stream in node.streams:
+                create_graph_connections(stream, previous)
+            return
+    previous.append(new_connections)
+
+
+def view(graph: Stream, filename: str = None) -> None:
     "Creates graph of filters"
-
-    import networkx as nx  # type: ignore
-    from matplotlib import pyplot as plt  # type: ignore
-
-    colors = {"input": "#99cc00", "output": "#99ccff", "filter": "#ffcc00"}
 
     G = nx.DiGraph()
 
     graph_connection = []
-
-    for node in graph._nodes:
-        if isinstance(node, SourceFilter):
-            graph_connection.append((node.in_path.split("/")[-1], colors["input"]))
-        elif isinstance(node, SinkFilter):
-            graph_connection.append((node.out_path.split("/")[-1], colors["output"]))
-        elif isinstance(node, Filter):
-            graph_connection.append((node.command, colors["filter"]))
+    create_graph_connections(graph, graph_connection)
+    unique_nodes = list(
+        dict.fromkeys(
+            itertools.chain.from_iterable(
+                graph_connection
+            )
+        )
+    )
 
     # Adding nodes
-    for nodeG, color in graph_connection:
-        G.add_node(nodeG, color=color)
+    for pre_node in unique_nodes:
+        G.add_node(pre_node.name, color=pre_node.color)
 
     # Adding edges
-    for i in range(len(graph_connection) - 1):
-        G.add_edge(graph_connection[i][0], graph_connection[i + 1][0])
+    for pre_node in unique_nodes:
+        if (prev := pre_node.prev_node()) is not None:
+            G.add_edge(prev, pre_node.name)
 
-    # Set nodes to be horizontal
-    pos = {}
-    for i, nodeG in enumerate(graph_connection):  # type: ignore
-        pos[nodeG[0]] = (i, 0)
-
+    pos = nx.planar_layout(G)
     nx.draw(
-        G, pos, with_labels=True, node_shape="s", node_size=3000, node_color=[color for _, color in graph_connection], font_weight="bold"
+        G,
+        pos,
+        with_labels=True,
+        node_shape="s",
+        node_size=3000,
+        node_color=[node.color for node in unique_nodes],
+        font_weight="bold"
     )
 
     if filename:
