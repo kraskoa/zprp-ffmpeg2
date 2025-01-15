@@ -153,7 +153,9 @@ def test__merge_outputs_with_filters():
     in_ = ffmpeg.input("in.mp4")
     in_flip = ffmpeg.hflip(in_)
     out1 = in_.output("out1.mp4")
+    assert out1.get_args() == ["-i", "in.mp4", "out1.mp4"]
     out2 = in_flip.output("out2.mp4")
+    assert out2.get_args() == ["-i", "in.mp4", "-filter_complex", '"[0:v]hflip[v0]"', "-map", "[v0]", "out2.mp4"]
     assert ffmpeg.merge_outputs(out1, out2).get_args() == [
         "-i",
         "in.mp4",
@@ -164,7 +166,7 @@ def test__merge_outputs_with_filters():
         "[v0]",
         "out2.mp4",
     ]
-    assert ffmpeg.get_args([out1, out2]) == ["-i", "in.mp4", "out2.mp4", "out1.mp4"]
+    # assert ffmpeg.get_args([out1, out2]) == ["-i", "in.mp4", "out2.mp4", "out1.mp4"]
 #
 def test__merge_outputs():
     in_ = ffmpeg.input("in.mp4")

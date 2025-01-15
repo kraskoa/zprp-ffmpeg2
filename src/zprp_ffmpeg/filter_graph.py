@@ -37,6 +37,12 @@ class ComplexCommand:
     kwargs: str = ""
 
 
+@dataclass
+class MergeOutputCommand(ComplexCommand):
+    inputs: str = ""
+    outputs: str = ""
+
+
 class Filter:
     """Filters can have many inputs and many outputs, holds the filter name and potential params"""
 
@@ -160,9 +166,9 @@ class MergeOutputFilter:
                 elif isinstance(node, SinkFilter):
                     outputs.append(cmd.file)
 
-        return ComplexCommand(
-            kwargs=" ".join(inputs),  # Zawiera wszystkie wejścia, np. "-i in.mp4"
-            file=" ".join(outputs),  # Zawiera wszystkie wyjścia, np. "out1.mp4 out2.mp4"
+        return MergeOutputCommand(
+            inputs=" ".join(inputs),  # Zawiera wszystkie wejścia, np. "-i in.mp4"
+            outputs=" ".join(outputs),  # Zawiera wszystkie wyjścia, np. "out1.mp4 out2.mp4"
         )
 
 
@@ -216,8 +222,8 @@ class FilterParser:
             elif isinstance(node, MergeOutputFilter):
                 # for sub_stream in node.streams:
                 #     self.generate_command(sub_stream)
-                self.inputs.append(node.get_command().kwargs)
-                self.outputs.append(node.get_command().file)
+                self.inputs.append(node.get_command().inputs)
+                self.outputs.append(node.get_command().outputs)
                 self.merge_counter += 1
                 continue
             else:
