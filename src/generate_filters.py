@@ -5,9 +5,9 @@ from filters_autogen.parse_ffmpeg import parse_source_code
 
 default_imports = """from typing import Optional
 
-from zprp_ffmpeg.FilterGraph import Filter
-from zprp_ffmpeg.FilterGraph import FilterOption
-from zprp_ffmpeg.FilterGraph import Stream\n\n"""
+from zprp_ffmpeg.filter_graph import Filter
+from zprp_ffmpeg.filter_graph import FilterOption
+from zprp_ffmpeg.filter_graph import Stream\n\n"""
 
 
 def generate_filters(ffmpeg_dir: Path, outpath: Path = Path(__file__).parent / "zprp_ffmpeg" / "generated_filters.py"):
