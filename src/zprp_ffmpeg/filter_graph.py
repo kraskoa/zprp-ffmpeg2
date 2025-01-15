@@ -181,7 +181,7 @@ class FilterParser:
         self.result_counter = 0
         self.merge_counter = 0
 
-        self.inputs = []
+        self.inputs = set()
         self.outputs = []
         self.filters = []
 
@@ -208,22 +208,30 @@ class FilterParser:
             # input
             elif isinstance(node, SourceFilter):
                 kwargs = command_obj.kwargs
-                self.inputs.append(f"{kwargs} {i_cmd} {file}")
+                self.inputs.add(f"{kwargs} {i_cmd} {file}")
                 last = self.inputs_counter
                 self.inputs_counter += 1
                 continue
             # output
             elif isinstance(node, SinkFilter):
-                self.outputs.append(f"{map_cmd} [{last}] {file}")
+                if last == 0:
+                    self.outputs.append(f"{file}")
+                else:
+                    self.outputs.append(f"{map_cmd} [{last}] {file}")
                 self.outputs_counter += 1
                 continue
             # single input single output
             # merge output
             elif isinstance(node, MergeOutputFilter):
-                # for sub_stream in node.streams:
-                #     self.generate_command(sub_stream)
-                self.inputs.append(node.get_command().inputs)
-                self.outputs.append(node.get_command().outputs)
+                for sub_stream in node.streams:
+                    self.generate_command(sub_stream)
+                    last = "None"
+                    self.inputs_counter = 0
+                    self.outputs_counter = 0
+                    self.filter_counter = 0
+                    self.result_counter = 0
+                # self.inputs.append(node.get_command().inputs)
+                # self.outputs.append(node.get_command().outputs)
                 self.merge_counter += 1
                 continue
             else:
@@ -241,17 +249,30 @@ class FilterParser:
     def generate_result(self, stream: Stream) -> str:
         self.generate_command(stream)
 
-        if len(self.filters) == 0 and self.merge_counter == 1:
+        if self.merge_counter == 1:
             merge_filter_node = None
             for node in stream._nodes:
                 if isinstance(node, MergeOutputFilter):
                     merge_filter_node = node
                     break
+            if len(self.filters) == 0:
+                return (
+                    " ".join(self.inputs)
+                    + " "
+                    + " ".join(self.outputs)
+                    + " "
+                    + " ".join(stream.global_options)
+                )
 
-            if merge_filter_node:
-                return " ".join(self.inputs) + " " + " ".join(self.outputs) + " ".join(stream.global_options)
-
-            return " ".join(self.inputs) + " " + " ".join(stream.global_options)
+            return (
+                " ".join(self.inputs)
+                + ' -filter_complex "'
+                + " ".join(self.filters)[:-1]
+                + '" '
+                + " ".join(self.outputs)
+                + " "
+                + " ".join(stream.global_options)
+            )
 
         elif len(self.filters) == 0:
             return " ".join(self.inputs) + " " + self.outputs[-1].split()[-1] + " " + " ".join(stream.global_options)
