@@ -185,8 +185,7 @@ class FilterParser:
         self.outputs = []
         self.filters = []
 
-    def generate_command(self, stream: Stream) -> str:  # type: ignore
-        last = "None"
+    def generate_command(self, stream: Stream, last=None) -> str:  # type: ignore
         for node in stream._nodes:
             command_obj = node.get_command()
             command = command_obj.command
@@ -195,6 +194,7 @@ class FilterParser:
             map_cmd = "-map"
             i_cmd = "-i"
             file = command_obj.file
+            print(self.inputs_counter)
 
             # many inputs one output
             if any(filter_ in command for filter_ in self.multi_input):
@@ -214,8 +214,11 @@ class FilterParser:
                 continue
             # output
             elif isinstance(node, SinkFilter):
-                if last == 0:
+                # print(last)
+                if last == 0 and len(self.inputs()) == 2:
                     self.outputs.append(f"{file}")
+                elif isinstance(last, int):
+                    self.outputs.append(f"{map_cmd} {last} {file}")
                 else:
                     self.outputs.append(f"{map_cmd} [{last}] {file}")
                 self.outputs_counter += 1
@@ -223,10 +226,12 @@ class FilterParser:
             # single input single output
             # merge output
             elif isinstance(node, MergeOutputFilter):
+                merge_last = None
                 for sub_stream in node.streams:
-                    self.generate_command(sub_stream)
-                    last = "None"
-                    self.inputs_counter = 0
+                    merge_last = self.generate_command(sub_stream, merge_last)
+                    print(merge_last)
+                    last = merge_last
+                    # self.inputs_counter = 0
                     self.outputs_counter = 0
                     self.filter_counter = 0
                     self.result_counter = 0

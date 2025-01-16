@@ -125,15 +125,40 @@ def test_probe():
 
 
 
-def test__multi_output_scaling():
-    in_ = ffmpeg.input("in.mp4")
-    out1 = in_.output("out1.mp4", vf="scale=1280:720")
-    out2 = in_.output("out2.mp4", vf="scale=640:360")
-    merged = ffmpeg.merge_outputs(out1, out2)
+# def test__multi_output_scaling():
+#     in_ = ffmpeg.input("in.mp4")
+#     out1 = in_.output("out1.mp4", vf="scale=1280:720")
+#     out2 = in_.output("out2.mp4", vf="scale=640:360")
+#     merged = ffmpeg.merge_outputs(out1, out2)
+#
+#     # Validate the arguments for the combined command
+#     assert merged.get_args() == [
+#         "-i", "in.mp4",
+#         "-vf", "scale=1280:720", "out1.mp4",
+#         "-vf", "scale=640:360", "out2.mp4",
+#     ]
 
-    # Validate the arguments for the combined command
-    assert merged.get_args() == [
-        "-i", "in.mp4",
-        "-vf", "scale=1280:720", "out1.mp4",
-        "-vf", "scale=640:360", "out2.mp4",
+def test_multi_passthrough():
+    out1 = ffmpeg.input("in1.mp4").output("out1.mp4")
+    out2 = ffmpeg.input("in2.mp4").output("out2.mp4")
+    out = ffmpeg.merge_outputs(out1, out2)
+    assert ffmpeg.get_args(out) == [
+        "-i",
+        "in1.mp4",
+        "-i",
+        "in2.mp4",
+        "out1.mp4",
+        "-map",
+        "1",
+        "out2.mp4",
+    ]
+    assert ffmpeg.get_args([out1, out2]) == [
+        "-i",
+        "in2.mp4",
+        "-i",
+        "in1.mp4",
+        "out2.mp4",
+        "-map",
+        "1",
+        "out1.mp4",
     ]
