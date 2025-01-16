@@ -1,6 +1,6 @@
-import zprp_ffmpeg as ffmpeg
-from zprp_ffmpeg.filter_graph import Filter
-from zprp_ffmpeg.filter_graph import FilterOption
+import zprp_ffmpeg2 as ffmpeg
+from zprp_ffmpeg2.filter_graph import Filter
+from zprp_ffmpeg2.filter_graph import FilterOption
 
 
 def test_input_output_no_filter():

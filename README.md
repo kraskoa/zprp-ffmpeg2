@@ -20,7 +20,7 @@
 - Add multi-output merging support (ffmpeg.merge_outputs())
 - Extend existing testing to cover more functionality of the ffmpeg-python library
 - Achieve full compatibility with ffmpeg-python library tests
-- In [filters source file](src/zprp_ffmpeg/filter_graph.py) change the way outputs from get_command() are processed - refrain from returning strings
+- In [filters source file](src/zprp_ffmpeg2/filter_graph.py) change the way outputs from get_command() are processed - refrain from returning strings
 - Updating the documentation to include implemented changes
 - Adding more detailed architecture description to explain the responsibilities of different components
 
