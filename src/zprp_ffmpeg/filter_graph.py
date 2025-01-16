@@ -198,7 +198,6 @@ class FilterParser:
             map_cmd = "-map"
             i_cmd = "-i"
             file = command_obj.file
-            print(self.inputs_counter)
 
             # many inputs one output
             if any(filter_ in command for filter_ in self.multi_input):
@@ -219,7 +218,6 @@ class FilterParser:
                 continue
             # output
             elif isinstance(node, SinkFilter):
-                # print(last)
                 if last == 0 or (len(self.input_file_to_index) == 1 and isinstance(last, int)):
                     self.outputs.append(f"{file}")
                 elif isinstance(last, int) and len(self.input_file_to_index) > 1:
@@ -234,14 +232,10 @@ class FilterParser:
                 merge_last = None
                 for sub_stream in node.streams:
                     merge_last = self.generate_command(sub_stream, merge_last)
-                    print(merge_last)
                     last = merge_last
-                    # self.inputs_counter = 0
                     self.outputs_counter = 0
                     self.filter_counter = 0
                     self.result_counter = 0
-                # self.inputs.append(node.get_command().inputs)
-                # self.outputs.append(node.get_command().outputs)
                 self.merge_counter += 1
                 continue
             else:
