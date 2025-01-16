@@ -11,6 +11,8 @@ from typing import List
 from typing import Optional
 from typing import Union
 
+from ordered_set import OrderedSet
+
 
 class FilterType(Enum):
     VIDEO = "AVMEDIA_TYPE_VIDEO"
@@ -184,6 +186,7 @@ class FilterParser:
         self.inputs = []
         self.outputs = []
         self.filters = []
+        self.input_files_set = set()
 
     def generate_command(self, stream: Stream, last=None) -> str:  # type: ignore
         for node in stream._nodes:
@@ -210,16 +213,19 @@ class FilterParser:
                 kwargs = command_obj.kwargs
                 self.inputs.append(f"{kwargs} {i_cmd} {file}")
                 last = self.inputs_counter
-                self.inputs_counter += 1
+                if file not in self.input_files_set:
+                    print("Wszedłem tutaj")
+                    self.input_files_set.add(file)
+                    self.inputs_counter += 1
                 continue
             # output
             elif isinstance(node, SinkFilter):
                 # print(last)
-                if last == 0:
+                if last == 0 or (len(self.input_files_set) == 1 and isinstance(last, int)):
                     self.outputs.append(f"{file}")
-                elif isinstance(last, int):
+                elif isinstance(last, int) and len(self.input_files_set) > 1:
                     self.outputs.append(f"{map_cmd} {last} {file}")
-                else:
+                elif len(self.input_files_set) > 1 or isinstance(last, str):
                     self.outputs.append(f"{map_cmd} [{last}] {file}")
                 self.outputs_counter += 1
                 continue
@@ -261,10 +267,10 @@ class FilterParser:
                     merge_filter_node = node
                     break
             if len(self.filters) == 0:
-                return " ".join(set(self.inputs)) + " " + " ".join(self.outputs) + " " + " ".join(stream.global_options)
+                return " ".join(list(OrderedSet(self.inputs))) + " " + " ".join(self.outputs) + " " + " ".join(stream.global_options)
 
             return (
-                " ".join(set(self.inputs))
+                " ".join(list(OrderedSet(self.inputs)))
                 + ' -filter_complex "'
                 + " ".join(self.filters)[:-1]
                 + '" '

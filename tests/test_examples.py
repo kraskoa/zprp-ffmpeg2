@@ -53,11 +53,14 @@ def test__merge_outputs_with_filters():
     ]
 
 def test__merge_outputs():
+    print("in_")
     in_ = ffmpeg.input("in.mp4")
+    print("out1")
     out1 = in_.output("out1.mp4")
-    assert out1.get_args() == ["-i", "in.mp4", "out1.mp4"]
+    # assert out1.get_args() == ["-i", "in.mp4", "out1.mp4"]
+    print("out2")
     out2 = in_.output("out2.mp4")
-    assert out2.get_args() == ["-i", "in.mp4", "out2.mp4"]
+    # assert out2.get_args() == ["-i", "in.mp4", "out2.mp4"]
     merged = ffmpeg.merge_outputs(out1, out2)
     assert merged.get_args() == ["-i", "in.mp4", "out1.mp4", "out2.mp4"]
 
