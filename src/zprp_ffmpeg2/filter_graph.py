@@ -289,6 +289,10 @@ def convert_kwargs_to_cmd_args(kwargs: Dict[str, Any]) -> str:
     """
     args = []
     for k, v in kwargs.items():
+        if isinstance(v, bool):
+            prefix = "" if v else "no"
+            args.append(f"-{prefix}{k}")
+            continue
         args.append(f"-{k}")
         args.append(str(v))
     return " ".join(args)
