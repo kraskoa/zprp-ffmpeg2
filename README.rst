@@ -13,11 +13,11 @@ ZPRP FFmpeg 2
       - |github-actions| |codecov|
     * - package
       - |version| |wheel| |supported-versions| |supported-implementations| |commits-since|
-.. |docs| image:: https://readthedocs.org/projects/zprp-ffmpeg/badge/?style=flat
+.. |docs| image:: https://readthedocs.org/projects/zprp-ffmpeg2/badge/?style=flat
     :target: https://readthedocs.org/projects/zprp-ffmpeg2/
     :alt: Documentation Status
 
-.. |github-actions| image:: https://github.com/ffmpeg-zprp/zprp-ffmpeg/actions/workflows/github-actions.yml/badge.svg
+.. |github-actions| image:: https://github.com/kraskoa/zprp-ffmpeg2/actions/workflows/github-actions.yml/badge.svg
     :alt: GitHub Actions Build Status
     :target: https://github.com/kraskoa/zprp-ffmpeg2/actions
 
@@ -25,19 +25,19 @@ ZPRP FFmpeg 2
     :alt: Coverage Status
     :target: https://app.codecov.io/gh/kraskoa/zprp-ffmpeg2
 
-.. |version| image:: https://img.shields.io/pypi/v/zprp-ffmpeg.svg
+.. |version| image:: https://img.shields.io/pypi/v/zprp-ffmpeg2.svg
     :alt: PyPI Package latest release
     :target: https://pypi.org/project/zprp-ffmpeg2
 
-.. |wheel| image:: https://img.shields.io/pypi/wheel/zprp-ffmpeg.svg
+.. |wheel| image:: https://img.shields.io/pypi/wheel/zprp-ffmpeg2.svg
     :alt: PyPI Wheel
     :target: https://pypi.org/project/zprp-ffmpeg2
 
-.. |supported-versions| image:: https://img.shields.io/pypi/pyversions/zprp-ffmpeg.svg
+.. |supported-versions| image:: https://img.shields.io/pypi/pyversions/zprp-ffmpeg2.svg
     :alt: Supported versions
     :target: https://pypi.org/project/zprp-ffmpeg2
 
-.. |supported-implementations| image:: https://img.shields.io/pypi/implementation/zprp-ffmpeg.svg
+.. |supported-implementations| image:: https://img.shields.io/pypi/implementation/zprp-ffmpeg2.svg
     :alt: Supported implementations
     :target: https://pypi.org/project/zprp-ffmpeg2
 
