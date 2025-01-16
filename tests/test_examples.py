@@ -34,10 +34,10 @@ def test__merge_outputs_with_filters():
         "in.mp4",
         "-filter_complex",
         '"[0:v]hflip[v0]"',
-        "out1.mp4",
         "-map",
         "[v0]",
         "out2.mp4",
+        "out1.mp4",
     ]
     assert ffmpeg.get_args([out1, out2]) == [
         "-i",
