@@ -139,6 +139,7 @@ def test_probe():
 #     ]
 
 def test_multi_passthrough():
+    """https://github.com/kkroening/ffmpeg-python/blob/master/ffmpeg/tests/test_ffmpeg.py#L631"""
     out1 = ffmpeg.input("in1.mp4").output("out1.mp4")
     out2 = ffmpeg.input("in2.mp4").output("out2.mp4")
     out = ffmpeg.merge_outputs(out1, out2)
