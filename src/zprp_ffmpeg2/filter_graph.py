@@ -187,7 +187,7 @@ class FilterParser:
         self.inputs = []
         self.outputs = []
         self.filters = []
-        self.input_file_to_index = OrderedDict()  # Nowe mapowanie
+        self.input_file_to_index = OrderedDict()
 
     def generate_command(self, stream: Stream, last=None) -> str:  # type: ignore
         for node in stream._nodes:
