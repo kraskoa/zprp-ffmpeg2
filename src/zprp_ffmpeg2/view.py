@@ -6,9 +6,6 @@ from typing import Any
 from typing import Iterable
 from typing import List
 
-import networkx as nx  # type: ignore
-from matplotlib import pyplot as plt  # type: ignore
-
 from .filter_graph import AnyNode
 from .filter_graph import Filter
 from .filter_graph import MergeOutputFilter
@@ -118,6 +115,9 @@ def flatten_graph_connections(graph_connection: PrepNodeList) -> PrepNodeList:
 
 def view(graph: Stream, filename: str = None) -> None:
     "Creates a graph of filters"
+
+    import networkx as nx  # type: ignore
+    from matplotlib import pyplot as plt  # type: ignore
 
     G = nx.DiGraph()
 
