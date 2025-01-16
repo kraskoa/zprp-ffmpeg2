@@ -215,7 +215,7 @@ class FilterParser:
             # output
             elif isinstance(node, SinkFilter):
                 # print(last)
-                if last == 0 and len(self.inputs()) == 2:
+                if last == 0:
                     self.outputs.append(f"{file}")
                 elif isinstance(last, int):
                     self.outputs.append(f"{map_cmd} {last} {file}")
