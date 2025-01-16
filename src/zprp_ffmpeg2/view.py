@@ -5,6 +5,7 @@ from enum import Enum
 from typing import Any
 from typing import Iterable
 from typing import List
+from typing import Optional
 
 from .filter_graph import AnyNode
 from .filter_graph import Filter
@@ -113,7 +114,7 @@ def flatten_graph_connections(graph_connection: PrepNodeList) -> PrepNodeList:
     return list(dict.fromkeys(flat_graph_connection))
 
 
-def view(graph: Stream, filename: str = None) -> None:
+def view(graph: Stream, filename: Optional[str] = None) -> None:
     "Creates a graph of filters"
 
     import networkx as nx  # type: ignore
