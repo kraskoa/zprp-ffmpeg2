@@ -151,6 +151,7 @@ class MergeOutputFilter:
         streams (Iterable[Stream]): The streams to be merged.
         _in (List[Union[Filter, SourceFilter, SinkFilter]]): List of input nodes connected to this merge filter.
     """
+
     def __init__(self, streams: Iterable[Stream]):
         self.streams = streams
         self._in: List[Union["Filter", "SourceFilter", "SinkFilter"]] = []
