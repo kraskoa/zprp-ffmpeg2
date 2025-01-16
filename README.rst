@@ -10,16 +10,12 @@ ZPRP FFmpeg 2
     * - docs
       - |docs|
     * - tests
-      - |github-actions| |codecov|
+      - |codecov|
     * - package
       - |version| |wheel| |supported-versions| |supported-implementations| |commits-since|
 .. |docs| image:: https://readthedocs.org/projects/zprp-ffmpeg2/badge/?style=flat
     :target: https://readthedocs.org/projects/zprp-ffmpeg2/
     :alt: Documentation Status
-
-.. |github-actions| image:: https://github.com/kraskoa/zprp-ffmpeg2/actions/workflows/github-actions.yml/badge.svg
-    :alt: GitHub Actions Build Status
-    :target: https://github.com/kraskoa/zprp-ffmpeg2/actions
 
 .. |codecov| image:: https://codecov.io/gh/ffmpeg-zprp/zprp-ffmpeg/branch/main/graphs/badge.svg?branch=main
     :alt: Coverage Status
@@ -41,9 +37,9 @@ ZPRP FFmpeg 2
     :alt: Supported implementations
     :target: https://pypi.org/project/zprp-ffmpeg2
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/kraskoa/zprp-ffmpeg2/v1.0.0.svg
+.. |commits-since| image:: https://img.shields.io/github/commits-since/kraskoa/zprp-ffmpeg2/v3.1.0.svg
     :alt: Commits since latest release
-    :target: https://github.com/kraskoa/zprp-ffmpeg2/compare/v1.0.0...main
+    :target: https://github.com/kraskoa/zprp-ffmpeg2/compare/v3.1.0...main
 
 
 
