@@ -52,7 +52,7 @@ class PrepNodeList(UserList):
                   "to PrepNodeList")
             )
         if isinstance(item, PrepNode):
-            if (item.name, item.path) not in [(e.name, e.path) for e in self.data]:
+            if item not in self.data:
                 self.counter[item.name] += 1
             if (c := self.counter[item.name]) > 1:
                 item = PrepNode(
@@ -82,7 +82,7 @@ def create_graph_connections(
             new_connections.append(
                 PrepNode(
                     node.in_path.split("/")[-1],
-                    NodeColors.INPUT.value,
+                    NodeColors.INPUT,
                     ""
                 )
             )
@@ -90,7 +90,7 @@ def create_graph_connections(
             new_connections.append(
                 PrepNode(
                     node.out_path.split("/")[-1],
-                    NodeColors.OUTPUT.value,
+                    NodeColors.OUTPUT,
                     new_connections[-1].create_path_for_next()
                 )
             )
@@ -112,7 +112,7 @@ def create_graph_connections(
             new_connections.append(
                 PrepNode(
                     node.command,
-                    NodeColors.FILTER.value,
+                    NodeColors.FILTER,
                     path
                 )
             )
@@ -128,13 +128,7 @@ def create_graph_connections(
         previous.extend(new_connections)
 
 
-def view(graph: Stream, filename: str = None) -> None:
-    "Creates a graph of filters"
-
-    G = nx.DiGraph()
-
-    graph_connection = PrepNodeList()
-    create_graph_connections(graph, graph_connection)
+def flatten_graph_connections(graph_connection: PrepNodeList) -> PrepNodeList:
     flat_graph_connection = []
 
     # This whole process could be shortened to more-itertools
@@ -144,7 +138,17 @@ def view(graph: Stream, filename: str = None) -> None:
             flat_graph_connection.extend(element)
         else:
             flat_graph_connection.append(element)
-    graph_connection = list(dict.fromkeys(flat_graph_connection))
+    return list(dict.fromkeys(flat_graph_connection))
+
+
+def view(graph: Stream, filename: str = None) -> None:
+    "Creates a graph of filters"
+
+    G = nx.DiGraph()
+
+    graph_connection = PrepNodeList()
+    create_graph_connections(graph, graph_connection)
+    graph_connection = flatten_graph_connections(graph_connection)
 
     # Adding nodes
     for pre_node in graph_connection:
@@ -156,14 +160,14 @@ def view(graph: Stream, filename: str = None) -> None:
             for p in prev:
                 G.add_edge(p, pre_node.name)
 
-    pos = nx.planar_layout(G)
+    pos = nx.circular_layout(G)
     nx.draw(
         G,
         pos,
         with_labels=True,
         node_shape="s",
         node_size=3000,
-        node_color=[node.color for node in graph_connection],
+        node_color=[node.color.value for node in graph_connection],
         font_weight="bold"
     )
 
