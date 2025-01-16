@@ -69,15 +69,15 @@ A minimal example showing basic usage of the library:
 
 .. code-block:: python
 
-    import zprp_ffmpeg2 as zprp_ffmpeg
-    stream = zprp_ffmpeg.input("input.mp4")
-    stream = zprp_ffmpeg.hflip(stream)
-    stream = zprp_ffmpeg.output(stream, "output.mp4")
-    zprp_ffmpeg.run(stream)
+    import zprp_ffmpeg2 as ffmpeg
+    stream = ffmpeg.input("input.mp4")
+    stream = ffmpeg.hflip(stream)
+    stream = ffmpeg.output(stream, "output.mp4")
+    ffmpeg.run(stream)
 
 Check out more `examples <https://github.com/kraskoa/zprp-ffmpeg2/tree/main/examples>`_
 
-Further documentation is available at https://zprp-ffmpeg2.readthedocs.io/en/latest/
+Further documentation is available `here <https://zprp-ffmpeg2.readthedocs.io/en/latest/>`_
 
 ===========
 Development
