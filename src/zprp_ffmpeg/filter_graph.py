@@ -254,10 +254,8 @@ class FilterParser:
         self.generate_command(stream)
 
         if self.merge_counter == 1:
-            merge_filter_node = None
             for node in stream._nodes:
                 if isinstance(node, MergeOutputFilter):
-                    merge_filter_node = node
                     break
             if len(self.filters) == 0:
                 return " ".join(list(OrderedSet(self.inputs))) + " " + " ".join(self.outputs) + " " + " ".join(stream.global_options)
