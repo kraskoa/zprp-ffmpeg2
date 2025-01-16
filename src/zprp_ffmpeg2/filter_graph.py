@@ -145,6 +145,12 @@ class Stream:
 
 
 class MergeOutputFilter:
+    """Represents a filter that merges multiple streams into one.
+
+    Attributes:
+        streams (Iterable[Stream]): The streams to be merged.
+        _in (List[Union[Filter, SourceFilter, SinkFilter]]): List of input nodes connected to this merge filter.
+    """
     def __init__(self, streams: Iterable[Stream]):
         self.streams = streams
         self._in: List[Union["Filter", "SourceFilter", "SinkFilter"]] = []
@@ -156,23 +162,10 @@ class MergeOutputFilter:
         raise NotImplementedError("This node can't have inputs")
 
     def get_command(self) -> ComplexCommand:
-        inputs = []
-        seen_files = set()
-        outputs = []
-
-        for stream in self.streams:
-            for node in stream._nodes:
-                cmd = node.get_command()
-                if isinstance(node, SourceFilter) and cmd.file not in seen_files:
-                    inputs.extend(["-i", cmd.file])
-                    seen_files.add(cmd.file)
-                elif isinstance(node, SinkFilter):
-                    outputs.append(cmd.file)
-
-        return MergeOutputCommand(
-            inputs=" ".join(inputs),  # Zawiera wszystkie wejścia, np. "-i in.mp4"
-            outputs=" ".join(outputs),  # Zawiera wszystkie wyjścia, np. "out1.mp4 out2.mp4"
-        )
+        """Method only made for compatibility with other nodes in FilterParser.
+        Returns empty command, which is not used in practice.
+        """
+        return MergeOutputCommand()
 
 
 class FilterParser:
@@ -285,6 +278,14 @@ class FilterParser:
 
 
 def convert_kwargs_to_cmd_args(kwargs: Dict[str, Any]) -> str:
+    """Converts keyword arguments to FFmpeg command-line arguments.
+
+    Args:
+        kwargs (Dict[str, Any]): Dictionary of keyword arguments.
+
+    Returns:
+        str: A string of command-line arguments suitable for FFmpeg.
+    """
     args = []
     for k, v in kwargs.items():
         args.append(f"-{k}")
