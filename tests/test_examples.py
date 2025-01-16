@@ -12,11 +12,9 @@ def test_concat_fade_duplicate():
     assert get_args(stream) == [
         "-i",
         "input.mp4",
-        "-i",
-        "input.mp4",
         "-filter_complex",
         '"[0:v]fade=type=in:nb_frames=30[v0];',
-        "[1:v]fade=type=in:nb_frames=30[v1];",
+        "[0:v]fade=type=in:nb_frames=30[v1];",
         '[v0][v1]concat[v2]"',
         "-map",
         "[v2]",

@@ -1,6 +1,7 @@
 """There is no general 'Node' class, because it doesn't work well with object relations, source and sink filters are kind of orthogonal.
 It slightly violates DRY, but the parameter types are different. It is what it is"""
 
+from collections import OrderedDict
 from copy import deepcopy
 from dataclasses import dataclass
 from enum import Enum
@@ -186,7 +187,7 @@ class FilterParser:
         self.inputs = []
         self.outputs = []
         self.filters = []
-        self.input_files_set = set()
+        self.input_file_to_index = OrderedDict()  # Nowe mapowanie
 
     def generate_command(self, stream: Stream, last=None) -> str:  # type: ignore
         for node in stream._nodes:
@@ -211,21 +212,19 @@ class FilterParser:
             # input
             elif isinstance(node, SourceFilter):
                 kwargs = command_obj.kwargs
-                self.inputs.append(f"{kwargs} {i_cmd} {file}")
-                last = self.inputs_counter
-                if file not in self.input_files_set:
-                    print("Wszedłem tutaj")
-                    self.input_files_set.add(file)
-                    self.inputs_counter += 1
+                if file not in self.input_file_to_index:
+                    self.input_file_to_index[file] = len(self.input_file_to_index)
+                    self.inputs.append(f"{kwargs} {i_cmd} {file}")
+                last = self.input_file_to_index[file]
                 continue
             # output
             elif isinstance(node, SinkFilter):
                 # print(last)
-                if last == 0 or (len(self.input_files_set) == 1 and isinstance(last, int)):
+                if last == 0 or (len(self.input_file_to_index) == 1 and isinstance(last, int)):
                     self.outputs.append(f"{file}")
-                elif isinstance(last, int) and len(self.input_files_set) > 1:
+                elif isinstance(last, int) and len(self.input_file_to_index) > 1:
                     self.outputs.append(f"{map_cmd} {last} {file}")
-                elif len(self.input_files_set) > 1 or isinstance(last, str):
+                elif len(self.input_file_to_index) > 1 or isinstance(last, str):
                     self.outputs.append(f"{map_cmd} [{last}] {file}")
                 self.outputs_counter += 1
                 continue
