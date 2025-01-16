@@ -3,12 +3,12 @@ from .filter_graph import (
     SinkFilter,
     SourceFilter,
     Stream,
-    MergeOutputFilter
+    MergeOutputFilter,
+    AnyNode
 )
 from enum import Enum
 import dataclasses
-from typing import List
-import itertools
+from typing import List, Any, Iterable
 import networkx as nx  # type: ignore
 from matplotlib import pyplot as plt  # type: ignore
 from collections import UserList, defaultdict
@@ -27,16 +27,17 @@ class PrepNode:
     path: str
 
     def create_path_for_next(self) -> str:
+        if "|" in self.path:
+            return self.name
         sep = ""
         if self.path:
             sep = ";"
         return f"{self.path}{sep}{self.name}"
 
-    def prev_node(self) -> str:
+    def prev_node(self) -> List[str] | None:
         if not self.path:
             return None
-        else:
-            return self.path.split(";")[-1]
+        return [path.split(";")[-1] for path in self.path.split("|")]
 
 
 class PrepNodeList(UserList):
@@ -44,25 +45,39 @@ class PrepNodeList(UserList):
         super().__init__()
         self.counter = defaultdict(int)
 
-    def append(self, item) -> None:
-        if not isinstance(item, PrepNode):
+    def append(self, item: Any) -> None:
+        if not isinstance(item, (PrepNode, PrepNodeList)):
             raise ValueError(
-                "Only PrepNode object can be added to PrepNodeList"
+                ("Only PrepNode and PrepNodeList objects and can be added "
+                  "to PrepNodeList")
             )
-        if (item.name, item.path) not in [(element.name, element.path) for element in self.data]:
-            self.counter[item.name] += 1
-        if (c := self.counter[item.name]) > 1:
-            item = PrepNode(
-                f"{item.name}({c})",
-                item.color,
-                item.path
-            )
+        if isinstance(item, PrepNode):
+            if (item.name, item.path) not in [(e.name, e.path) for e in self.data]:
+                self.counter[item.name] += 1
+            if (c := self.counter[item.name]) > 1:
+                item = PrepNode(
+                    f"{item.name}({c})",
+                    item.color,
+                    item.path
+                )
         self.data.append(item)
 
+    def extend(self, iterable: Iterable) -> None:
+        for element in iterable:
+            self.append(element)
 
-def create_graph_connections(graph: Stream, previous: List[PrepNode]) -> None:
+
+def create_graph_connections(
+        parent_node: AnyNode | "Stream",
+        previous: PrepNodeList
+        ) -> None:
     new_connections = PrepNodeList()
-    for node in graph._nodes:
+    nodes = None
+    if isinstance(parent_node, Filter):
+        nodes = parent_node._in
+    else:
+        nodes = parent_node._nodes
+    for node in nodes:
         if isinstance(node, SourceFilter):
             new_connections.append(
                 PrepNode(
@@ -80,43 +95,66 @@ def create_graph_connections(graph: Stream, previous: List[PrepNode]) -> None:
                 )
             )
         elif isinstance(node, Filter):
+            path = ""
+            if not new_connections:
+                create_graph_connections(node, previous)
+                paths = []
+                streams = []
+                for _ in range(len(node._in)):
+                    processed_stream = previous.pop()
+                    paths.append(processed_stream[-1].create_path_for_next())
+                    streams.append(processed_stream)
+                for stream in streams:
+                    previous.extend(stream)
+                path = "|".join(paths)
+            else:
+                path = new_connections[-1].create_path_for_next()
             new_connections.append(
                 PrepNode(
                     node.command,
                     NodeColors.FILTER.value,
-                    new_connections[-1].create_path_for_next()
+                    path
                 )
             )
         elif isinstance(node, MergeOutputFilter):
             for stream in node.streams:
                 create_graph_connections(stream, previous)
             return
-    previous.append(new_connections)
+        elif isinstance(node, Stream):
+            create_graph_connections(node, previous)
+    if isinstance(parent_node, Stream):
+        previous.append(new_connections)
+    else:
+        previous.extend(new_connections)
 
 
 def view(graph: Stream, filename: str = None) -> None:
-    "Creates graph of filters"
+    "Creates a graph of filters"
 
     G = nx.DiGraph()
 
-    graph_connection = []
+    graph_connection = PrepNodeList()
     create_graph_connections(graph, graph_connection)
-    unique_nodes = list(
-        dict.fromkeys(
-            itertools.chain.from_iterable(
-                graph_connection
-            )
-        )
-    )
+    flat_graph_connection = []
+
+    # This whole process could be shortened to more-itertools
+    # package's collapse
+    for element in graph_connection:
+        if isinstance(element, PrepNodeList):
+            flat_graph_connection.extend(element)
+        else:
+            flat_graph_connection.append(element)
+    graph_connection = list(dict.fromkeys(flat_graph_connection))
 
     # Adding nodes
-    for pre_node in unique_nodes:
+    for pre_node in graph_connection:
         G.add_node(pre_node.name, color=pre_node.color)
 
     # Adding edges
-    for pre_node in unique_nodes:
+    for pre_node in graph_connection:
         if (prev := pre_node.prev_node()) is not None:
-            G.add_edge(prev, pre_node.name)
+            for p in prev:
+                G.add_edge(p, pre_node.name)
 
     pos = nx.planar_layout(G)
     nx.draw(
@@ -125,7 +163,7 @@ def view(graph: Stream, filename: str = None) -> None:
         with_labels=True,
         node_shape="s",
         node_size=3000,
-        node_color=[node.color for node in unique_nodes],
+        node_color=[node.color for node in graph_connection],
         font_weight="bold"
     )
 
