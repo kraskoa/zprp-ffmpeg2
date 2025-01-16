@@ -13,11 +13,11 @@ extensions = [
 ]
 source_suffix = ".rst"
 master_doc = "index"
-project = "zprp-ffmpeg2"
+project = "zprp_ffmpeg2"
 year = "2025"
 author = "Gregory Chmielewski, Adam Kraś, Krzysztof Król"
 copyright = f"{year}, {author}"
-version = release = "1.0.0"
+version = release = "3.0.1"
 
 pygments_style = "trac"
 templates_path = ["."]
