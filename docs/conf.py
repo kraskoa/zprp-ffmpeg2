@@ -17,7 +17,7 @@ project = "zprp_ffmpeg2"
 year = "2025"
 author = "Gregory Chmielewski, Adam Kraś, Krzysztof Król"
 copyright = f"{year}, {author}"
-version = release = "3.0.0"
+version = release = "3.0.1"
 
 pygments_style = "trac"
 templates_path = ["."]
