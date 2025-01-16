@@ -47,7 +47,7 @@ class PrepNodeList(UserList):
 
     def append(self, item: Any) -> None:
         if not isinstance(item, (PrepNode, PrepNodeList)):
-            raise ValueError("Only PrepNode and PrepNodeList objects and can be added " "to PrepNodeList")
+            raise ValueError("Only PrepNode and PrepNodeList objects and can be added to PrepNodeList")
         if isinstance(item, PrepNode):
             if item not in self.data:
                 self.counter[item.name] += 1

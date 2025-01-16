@@ -45,7 +45,7 @@ def test_prep_node_list_append():
     assert len(nodes) == 3
     assert nodes.counter != counter_state
     not_node = NodeColors.FILTER
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Only PrepNode and PrepNodeList objects and can be added to PrepNodeList"):
         nodes.append(not_node)
 
 
