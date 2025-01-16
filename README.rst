@@ -14,36 +14,36 @@ ZPRP FFmpeg
     * - package
       - |version| |wheel| |supported-versions| |supported-implementations| |commits-since|
 .. |docs| image:: https://readthedocs.org/projects/zprp-ffmpeg/badge/?style=flat
-    :target: https://readthedocs.org/projects/zprp-ffmpeg/
+    :target: https://readthedocs.org/projects/zprp-ffmpeg2/
     :alt: Documentation Status
 
 .. |github-actions| image:: https://github.com/ffmpeg-zprp/zprp-ffmpeg/actions/workflows/github-actions.yml/badge.svg
     :alt: GitHub Actions Build Status
-    :target: https://github.com/ffmpeg-zprp/zprp-ffmpeg/actions
+    :target: https://github.com/kraskoa/zprp-ffmpeg2/actions
 
 .. |codecov| image:: https://codecov.io/gh/ffmpeg-zprp/zprp-ffmpeg/branch/main/graphs/badge.svg?branch=main
     :alt: Coverage Status
-    :target: https://app.codecov.io/gh/ffmpeg-zprp/zprp-ffmpeg
+    :target: https://app.codecov.io/gh/kraskoa/zprp-ffmpeg2
 
 .. |version| image:: https://img.shields.io/pypi/v/zprp-ffmpeg.svg
     :alt: PyPI Package latest release
-    :target: https://pypi.org/project/zprp-ffmpeg
+    :target: https://pypi.org/project/zprp-ffmpeg2
 
 .. |wheel| image:: https://img.shields.io/pypi/wheel/zprp-ffmpeg.svg
     :alt: PyPI Wheel
-    :target: https://pypi.org/project/zprp-ffmpeg
+    :target: https://pypi.org/project/zprp-ffmpeg2
 
 .. |supported-versions| image:: https://img.shields.io/pypi/pyversions/zprp-ffmpeg.svg
     :alt: Supported versions
-    :target: https://pypi.org/project/zprp-ffmpeg
+    :target: https://pypi.org/project/zprp-ffmpeg2
 
 .. |supported-implementations| image:: https://img.shields.io/pypi/implementation/zprp-ffmpeg.svg
     :alt: Supported implementations
-    :target: https://pypi.org/project/zprp-ffmpeg
+    :target: https://pypi.org/project/zprp-ffmpeg2
 
 .. |commits-since| image:: https://img.shields.io/github/commits-since/ffmpeg-zprp/zprp-ffmpeg/v2.2.0.svg
     :alt: Commits since latest release
-    :target: https://github.com/ffmpeg-zprp/zprp-ffmpeg/compare/v2.2.0...main
+    :target: https://github.com/kraskoa/zprp-ffmpeg2/compare/v1.0.0...main
 
 
 
