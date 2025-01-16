@@ -8,7 +8,7 @@ little bit helps, and credit will always be given.
 Bug reports
 ===========
 
-When `reporting a bug <https://github.com/Madghostek/zprp-ffmpeg/issues>`_ please include:
+When reporting a bug (`here <https://github.com/Madghostek/zprp-ffmpeg/issues>`_ or `here <https://github.com/kraskoa/zprp-ffmpeg2/issues>`_) please include:
 
     * Your operating system name and version.
     * Any details about your local setup that might be helpful in troubleshooting.
