@@ -4,6 +4,35 @@ Changelog
 All notable changes to this project will be documented in this file.
 Dates are displayed in UTC.
 
+
+`v3.1.0 <https://github.com/kraskoa/zprp-ffmpeg2/compare/v3.0.1...v3.1.0>`__
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+   16 January 2025
+
+-  Expanded input() function to accept kwargs
+   ```f8385ee`` <https://github.com/kraskoa/zprp-ffmpeg2/commit/f8385eea55c635971b3e7b9fb376e9dcc91161ce>`__
+-  Refactored and added tests for new functions
+   ```fad8b24`` <https://github.com/kraskoa/zprp-ffmpeg2/commit/fad8b24f2e55c6d40683a3e3c3428c3115b70cad>`__
+-  Final implementation of Node.get_command(), using dataclasses this time
+   ```3670704`` <https://github.com/kraskoa/zprp-ffmpeg2/commit/3670704a5871445500d8166f7910865b5982cc3b>`__
+-  Final implementation of merge_outputs() function from ffmpeg-python
+   ```4ae6419`` <https://github.com/kraskoa/zprp-ffmpeg2/commit/4ae6419ad0cc68cee1afcf0760cec80d181bec32>`__
+-  Modified the view() function to work with new functions as well
+   ```9d6f097`` <https://github.com/kraskoa/zprp-ffmpeg2/commit/9d6f097920f48ff91851bacbc4251d28ecd2d8db>`__
+
+`v3.0.1 <https://github.com/kraskoa/zprp-ffmpeg2/compare/v2.2.0...v3.0.1>`__
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+   22 December 2024
+
+-  Refactored Node.get_command() to not operate on strings, using dictionaries instead
+   ```dcf0c87`` <https://github.com/kraskoa/zprp-ffmpeg2/commit/dcf0c87bbe1e07ea5844fcdc3e832f2214f40f5a>`__
+-  Added concat() tests from the original ffmpeg-python library
+   ```8226e09`` <https://github.com/kraskoa/zprp-ffmpeg2/commit/8226e0969ecae35d42a2c784cc021c4412399868>`__
+-  Initial implementation of the merge_outputs() function from ffmpeg-python
+   ```ddf68a4`` <https://github.com/kraskoa/zprp-ffmpeg2/commit/ddf68a4b5e683e06f44050957064a2a718b66515>`__
+
 `v2.2.0 <https://github.com/ffmpeg-zprp/zprp-ffmpeg/compare/v2.1.2...v2.2.0>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
