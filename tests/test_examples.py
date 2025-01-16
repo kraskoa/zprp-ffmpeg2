@@ -1,7 +1,7 @@
 
-import zprp_ffmpeg as ffmpeg
-import zprp_ffmpeg.filter_graph
-from zprp_ffmpeg import get_args
+import zprp_ffmpeg2 as ffmpeg
+import zprp_ffmpeg2.filter_graph
+from zprp_ffmpeg2 import get_args
 
 
 def test_concat_fade_duplicate():

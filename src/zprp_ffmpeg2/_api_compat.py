@@ -5,7 +5,7 @@ from functools import singledispatch
 from typing import List
 from typing import Tuple
 
-from zprp_ffmpeg.base_connector import BaseConnector
+from zprp_ffmpeg2.base_connector import BaseConnector
 
 from .filter_graph import Filter
 from .filter_graph import FilterOption

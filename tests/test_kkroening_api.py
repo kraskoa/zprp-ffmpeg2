@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-import zprp_ffmpeg as ffmpeg
+import zprp_ffmpeg2 as ffmpeg
 
 
 def test_input():

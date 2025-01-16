@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "zprp-ffmpeg"
-version = "2.2.0"
+name = "zprp-ffmpeg2"
+version = "1.0.0"
 description = "ffmpeg filter graph bindings for python"
-authors = ["Your Name <you@example.com>"]
+authors = ["Gregory Chmielewski", "Adam Kraś", "Krzysztof Król"]
 license = "MIT"
-readme = "README_old.rst"
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.8"

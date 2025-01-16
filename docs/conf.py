@@ -13,17 +13,17 @@ extensions = [
 ]
 source_suffix = ".rst"
 master_doc = "index"
-project = "zprp-ffmpeg"
-year = "2024"
-author = ""
+project = "zprp-ffmpeg2"
+year = "2025"
+author = "Gregory Chmielewski, Adam Kraś, Krzysztof Król"
 copyright = f"{year}, {author}"
-version = release = "2.2.0"
+version = release = "1.0.0"
 
 pygments_style = "trac"
 templates_path = ["."]
 extlinks = {
-    "issue": ("https://github.com/ffmpeg-zprp/zprp-ffmpeg/issues/%s", "#"),
-    "pr": ("https://github.com/ffmpeg-zprp/zprp-ffmpeg/pull/%s", "PR #"),
+    "issue": ("https://github.com/kraskoa/zprp-ffmpeg2/issues/%s", "#"),
+    "pr": ("https://github.com/kraskoa/zprp-ffmpeg2/pull/%s", "PR #"),
 }
 # on_rtd is whether we are on readthedocs.org
 on_rtd = os.environ.get("READTHEDOCS", None) == "True"

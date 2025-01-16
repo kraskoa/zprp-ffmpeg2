@@ -86,9 +86,9 @@ def construct_file(filters: List[Filter]) -> str:
 
 
 if __name__ == "__main__":
-    imports = b"""from zprp_ffmpeg.FilterGraph import Filter
-from zprp_ffmpeg.FilterGraph import FilterOption
-from zprp_ffmpeg.FilterGraph import Stream\n\n"""
+    imports = b"""from zprp_ffmpeg2.FilterGraph import Filter
+from zprp_ffmpeg2.FilterGraph import FilterOption
+from zprp_ffmpeg2.FilterGraph import Stream\n\n"""
 
     with (Path(__file__).parent / "FFmpeg" / "all_filters.pickle").open("rb") as f:
         filters = pickle.load(f)  # noqa: S301

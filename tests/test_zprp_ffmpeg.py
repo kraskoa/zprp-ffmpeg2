@@ -1,4 +1,4 @@
-# from zprp_ffmpeg.cli import main
+# from zprp_ffmpeg2.cli import main
 
 
 # def test_main():
