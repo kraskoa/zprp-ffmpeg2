@@ -41,7 +41,7 @@ ZPRP FFmpeg 2
     :alt: Supported implementations
     :target: https://pypi.org/project/zprp-ffmpeg2
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/ffmpeg-zprp/zprp-ffmpeg/v2.2.0.svg
+.. |commits-since| image:: https://img.shields.io/github/commits-since/kraskoa/zprp-ffmpeg2/v1.0.0.svg
     :alt: Commits since latest release
     :target: https://github.com/kraskoa/zprp-ffmpeg2/compare/v1.0.0...main
 
