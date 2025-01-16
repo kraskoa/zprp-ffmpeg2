@@ -59,7 +59,7 @@ Installation
 
 The package is available on pip::
 
-    pip install zprp_ffmpeg
+    pip install zprp_ffmpeg2
 
 ===============
 Getting started
@@ -69,15 +69,15 @@ A minimal example showing basic usage of the library:
 
 .. code-block:: python
 
-    import zprp_ffmpeg
+    import zprp_ffmpeg2 as zprp_ffmpeg
     stream = zprp_ffmpeg.input("input.mp4")
     stream = zprp_ffmpeg.hflip(stream)
     stream = zprp_ffmpeg.output(stream, "output.mp4")
     zprp_ffmpeg.run(stream)
 
-Check out more `examples <https://github.com/ffmpeg-zprp/zprp-ffmpeg/tree/main/examples>`_
+Check out more `examples <https://github.com/kraskoa/zprp-ffmpeg2/tree/main/examples>`_
 
-Further documentation is available at https://zprp-ffmpeg.readthedocs.io/en/latest/
+Further documentation is available at https://zprp-ffmpeg2.readthedocs.io/en/latest/
 
 ===========
 Development
@@ -100,7 +100,8 @@ To run tests on multiple python interpreters, build documentation, check for lin
 
     tox
 
-However, this might be cumbersome, since it requires having all supported python interpreters available. To run only selected interpreters, use :code:`-e` option, for example:
+However, this might be cumbersome, since it requires having all supported python interpreters available.
+To run only selected interpreters, use :code:`-e` option, for example:
 
 .. code-block:: bash
 
