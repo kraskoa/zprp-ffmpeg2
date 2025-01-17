@@ -236,7 +236,7 @@ class FilterParser:
                 if isinstance(last, int):
                     self.filters.append(f"[{last}{filter_type_command}{command}{params}[v{self.result_counter}];")
                 else:
-                    self.filters.append(f"[{last}{command}{params}[v{self.result_counter}];")
+                    self.filters.append(f"[{last}]{command}{params}[v{self.result_counter}];")
                 last = f"v{self.result_counter}"
                 self.result_counter += 1
 
@@ -246,6 +246,7 @@ class FilterParser:
 
     def generate_result(self, stream: Stream) -> str:
         self.generate_command(stream)
+        self.filters = list(OrderedSet(self.filters))
 
         if self.merge_counter == 1:
             for node in stream._nodes:
@@ -254,10 +255,30 @@ class FilterParser:
             if len(self.filters) == 0:
                 return " ".join(list(OrderedSet(self.inputs))) + " " + " ".join(self.outputs) + " " + " ".join(stream.global_options)
 
+            filters = "".join(self.filters)[:-1]
+            o_counter = 0
+            new_outputs = []
+            mapped_outs = [out for out in self.outputs if "-map" in out]
+            other_outs = [out for out in self.outputs if out not in mapped_outs]
+            for output in mapped_outs[:-1]:
+                k = output.find("[")
+                l = output.find("]")
+                out = output[k + 1 : l]
+                j = filters.find(out)
+                new_out = f"[out{o_counter}]"
+                filters = filters[: j - 1] + ",split" + new_out + filters[j - 1 :]
+                new_output = output[:k] + new_out + output[l + 1 :]
+                new_outputs.append(new_output)
+                o_counter += 1
+            last_output = mapped_outs[-1]
+            self.outputs = new_outputs
+            self.outputs.append(last_output)
+            self.outputs.extend(other_outs)
+
             return (
                 " ".join(list(OrderedSet(self.inputs)))
                 + ' -filter_complex "'
-                + " ".join(self.filters)[:-1]
+                + filters
                 + '" '
                 + " ".join(self.outputs)
                 + " "
