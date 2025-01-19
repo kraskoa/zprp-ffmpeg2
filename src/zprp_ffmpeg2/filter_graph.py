@@ -11,7 +11,7 @@ from typing import Iterable
 from typing import List
 from typing import Optional
 from typing import Union
-
+from collections import defaultdict
 from ordered_set import OrderedSet
 
 
@@ -48,8 +48,16 @@ class MergeOutputCommand(ComplexCommand):
 
 class Filter:
     """Filters can have many inputs and many outputs, holds the filter name and potential params"""
+    _filter_counter = defaultdict(int)
 
-    def __init__(self, command: str, params: Optional[List[FilterOption]] = None, filter_type: str = FilterType.VIDEO.value):
+    def __new__(cls, *args, **kwargs):
+        instance = super().__new__(cls)
+        if "command" in kwargs:
+            cls._filter_counter[kwargs["command"]] += 1
+            instance._id = cls._filter_counter[kwargs["command"]]
+        return instance
+
+    def __init__(self, *, command: str, params: Optional[List[FilterOption]] = None, filter_type: str = FilterType.VIDEO.value):
         self._out: List[AnyNode] = []
         self._in: List[AnyNode | "Stream"] = []
         self.command = command
