@@ -12,6 +12,7 @@ from typing import Iterable
 from typing import List
 from typing import Optional
 from typing import Union
+from typing import ClassVar
 
 from ordered_set import OrderedSet
 
@@ -50,7 +51,7 @@ class MergeOutputCommand(ComplexCommand):
 class Filter:
     """Filters can have many inputs and many outputs, holds the filter name and potential params"""
 
-    _filter_counter = defaultdict(int)
+    _filter_counter: ClassVar[Dict[str, int]] = defaultdict(int)
 
     def __new__(cls, *args, **kwargs):
         instance = super().__new__(cls)

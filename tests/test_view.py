@@ -9,7 +9,7 @@ from zprp_ffmpeg2.view import create_graph_connections
 
 
 @pytest.fixture(autouse=True)
-def run_before():
+def _run_before():
     Filter._filter_counter.clear()
 
 
@@ -61,7 +61,7 @@ def test_create_graph_connections_merged_outputs_chain():
     node4 = PrepNode("out1.mp4", NodeColors.OUTPUT, "in.mp4;fade")
     node5 = PrepNode("out2.mp4", NodeColors.OUTPUT, "in.mp4;fade;hflip")
     nodes_set = set(nodes)
-    twin_strim = set([node1, node2, node3, node4, node5])
+    twin_strim = {node1, node2, node3, node4, node5}
     assert len(nodes_set) == 5
     assert nodes_set == twin_strim
 
