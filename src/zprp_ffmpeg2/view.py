@@ -39,10 +39,10 @@ class PrepNode:
 
     @property
     def id(self):
-        if "(" in self.name:
-            return int(self.name[self.name.find("(")+1:self.name.find(")")])
-        else:
+        if (string := sub(r"\w+\((\d+)\)", r"\1", self.name)) == self.name:
             return 1
+        else:
+            return int(string)
 
     @property
     def command(self):
@@ -50,6 +50,9 @@ class PrepNode:
 
 
 def create_graph_connections(parent_node: AnyNode | "Stream", previous: List[PrepNode]) -> None:
+    """Creates list of PrepNode objects that contain stream data to later
+       transform it to a graph
+    """
     new_connections = []
     nodes = None
     if isinstance(parent_node, Filter):
