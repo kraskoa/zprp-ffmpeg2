@@ -8,6 +8,12 @@ from zprp_ffmpeg2.view import PrepNode
 from zprp_ffmpeg2.view import PrepNodeList
 from zprp_ffmpeg2.view import create_graph_connections
 from zprp_ffmpeg2.view import flatten_graph_connections
+from zprp_ffmpeg2._api_compat import Filter
+
+
+@pytest.fixture(autouse=True)
+def run_before():
+    Filter._filter_counter.clear()
 
 
 def test_prep_node_create_path_for_next():
@@ -26,73 +32,6 @@ def test_prep_node_prev_node():
     assert node2.prev_node() == ["in.mp4"]
     node3 = PrepNode("concat", NodeColors.FILTER, "in.mp4;hflip|in2.mp4")
     assert node3.prev_node() == ["hflip", "in2.mp4"]
-
-
-def test_prep_node_list_append():
-    nodes = PrepNodeList()
-    node1 = PrepNode("in.mp4", NodeColors.INPUT, "")
-    nodes.append(node1)
-    assert len(nodes) == 1
-    assert nodes.counter["in.mp4"] == 1
-    counter_state = copy(nodes.counter)
-    assert nodes[0] == node1
-    nodes2 = PrepNodeList()
-    nodes.append(nodes2)
-    assert len(nodes) == 2
-    assert nodes.counter == counter_state
-    node2 = PrepNode("filter", NodeColors.FILTER, "in.mp4")
-    nodes.append(node2)
-    assert len(nodes) == 3
-    assert nodes.counter != counter_state
-    not_node = NodeColors.FILTER
-    with pytest.raises(ValueError, match="Only PrepNode and PrepNodeList objects and can be added to PrepNodeList"):
-        nodes.append(not_node)
-
-
-def test_prep_node_list_append_same_filter_twice():
-    nodes = PrepNodeList()
-    node1 = PrepNode("in.mp4", NodeColors.INPUT, "")
-    nodes.append(node1)
-    assert nodes.counter["beau_filter"] == 0
-    node2 = PrepNode(
-        "beau_filter",
-        NodeColors.FILTER,
-        nodes[-1].create_path_for_next()
-    )
-    nodes.append(node2)
-    assert nodes.counter["beau_filter"] == 1
-    node3 = PrepNode(
-        node2.name,
-        NodeColors.FILTER,
-        nodes[-1].create_path_for_next()
-    )
-    nodes.append(node3)
-    assert nodes.counter["beau_filter"] == 2
-    assert nodes[-1].name == "beau_filter(2)"
-
-
-def test_prep_node_list_extend():
-    nodes = PrepNodeList()
-    node1 = PrepNode("in.mp4", NodeColors.INPUT, "")
-    node2 = PrepNode(
-        "test",
-        NodeColors.FILTER,
-        node1.create_path_for_next()
-    )
-    nodes.append(node1)
-    nodes.append(node2)
-    nodes2 = PrepNodeList()
-    node3 = PrepNode("test2", NodeColors.FILTER, "")
-    node4 = PrepNode(
-        "test",
-        NodeColors.FILTER,
-        node3.create_path_for_next()
-    )
-    nodes2.append(node3)
-    nodes2.append(node4)
-    nodes.extend(nodes2)
-    assert nodes.counter["test"] == 2
-    assert nodes[-1].name == "test(2)"
 
 
 def test_create_graph_connections_simple_chain():

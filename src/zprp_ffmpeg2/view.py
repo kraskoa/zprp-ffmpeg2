@@ -1,6 +1,5 @@
 import dataclasses
 from collections import UserList
-from collections import defaultdict
 from enum import Enum
 from typing import Any
 from typing import Iterable
@@ -42,18 +41,9 @@ class PrepNode:
 
 
 class PrepNodeList(UserList):
-    def __init__(self) -> None:
-        super().__init__()
-        self.counter = defaultdict(int)
-
     def append(self, item: Any) -> None:
         if not isinstance(item, (PrepNode, PrepNodeList)):
             raise ValueError("Only PrepNode and PrepNodeList objects and can be added to PrepNodeList")
-        if isinstance(item, PrepNode):
-            if item not in self.data:
-                self.counter[item.name] += 1
-            if (c := self.counter[item.name]) > 1:
-                item = PrepNode(f"{item.name}({c})", item.color, item.path)
         self.data.append(item)
 
     def extend(self, iterable: Iterable) -> None:
@@ -88,7 +78,8 @@ def create_graph_connections(parent_node: AnyNode | "Stream", previous: PrepNode
                 path = "|".join(paths)
             else:
                 path = new_connections[-1].create_path_for_next()
-            new_connections.append(PrepNode(node.command, NodeColors.FILTER, path))
+            suffix = "" if node._id < 2 else f"({node._id})"
+            new_connections.append(PrepNode(f"{node.command}{suffix}", NodeColors.FILTER, path))
         elif isinstance(node, MergeOutputFilter):
             for stream in node.streams:
                 create_graph_connections(stream, previous)
