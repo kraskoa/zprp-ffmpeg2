@@ -14,7 +14,7 @@ def concat(graphs: Iterable[Stream], n: Optional[int] = None, v: Optional[int] =
     :param int a: set the number of output audio streams, that is also the number of audio streams in each segment. Default is 0.
     """
     filter_ = Filter(
-        "concat",
+        command="concat",
         params=[
             FilterOption(name="n", value=n),
             FilterOption(name="v", value=v),

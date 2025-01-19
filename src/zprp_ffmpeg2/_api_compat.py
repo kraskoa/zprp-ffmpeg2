@@ -29,7 +29,7 @@ def filter(stream_spec: Stream, filter_name: str, *args, **kwargs) -> Stream:
         options.append(FilterOption(arg, None))
     for name, value in kwargs.items():
         options.append(FilterOption(name, value))
-    new_stream = stream_spec.append(Filter(filter_name, params=options))
+    new_stream = stream_spec.append(Filter(command=filter_name, params=options))
     return new_stream
 
 

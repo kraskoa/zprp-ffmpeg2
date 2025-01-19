@@ -14,7 +14,7 @@ from zprp_ffmpeg2.process_connector import ProcessConnector
 
 @pytest.mark.starts_process
 def test_ProcessConnector_any_graph():
-    fg = Stream().append(Filter("hflip", filter_type=FilterType.VIDEO.value))
+    fg = Stream().append(Filter(command="hflip", filter_type=FilterType.VIDEO.value))
     proc = ProcessConnector.run(fg)
     out, err = proc.communicate()
     print(out)
@@ -22,7 +22,7 @@ def test_ProcessConnector_any_graph():
 
 @pytest.mark.starts_process
 def test_communicate():
-    fg = Stream().append(Filter("hflip", filter_type=FilterType.VIDEO.value))
+    fg = Stream().append(Filter(command="hflip", filter_type=FilterType.VIDEO.value))
     stdout,stderr = ProcessConnector.run(fg,extra_options="-h").communicate()
 
     assert stdout is not None # exact output is not important, but communication should be possible
