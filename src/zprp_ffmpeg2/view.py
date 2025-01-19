@@ -12,6 +12,7 @@ from .filter_graph import MergeOutputFilter
 from .filter_graph import SinkFilter
 from .filter_graph import SourceFilter
 from .filter_graph import Stream
+from re import sub
 
 
 class NodeColors(Enum):
@@ -38,6 +39,17 @@ class PrepNode:
         if not self.path:
             return None
         return [path.split(";")[-1] for path in self.path.split("|")]
+
+    @property
+    def id(self):
+        if "(" in self.name:
+            return int(self.name[self.name.find("(")+1:self.name.find(")")])
+        else:
+            return 1
+
+    @property
+    def command(self):
+        return sub(r"(\w+)\(\d+\)", r'\1', self.name)
 
 
 class PrepNodeList(UserList):
@@ -68,13 +80,15 @@ def create_graph_connections(parent_node: AnyNode | "Stream", previous: PrepNode
             if not new_connections:
                 create_graph_connections(node, previous)
                 paths = []
-                streams = []
-                for _ in range(len(node._in)):
-                    processed_stream = previous.pop()
-                    paths.append(processed_stream[-1].create_path_for_next())
-                    streams.append(processed_stream)
-                for stream in streams:
-                    previous.extend(stream)
+                # streams = []
+                for stream in node._in:
+                    last_node = stream._nodes[-1]
+                    parent_prep_node = None
+                    if isinstance(last_node, Filter):
+                        parent_prep_node = next((n for n in previous if (n.command, n.id) == (last_node.command, last_node._id)))
+                    else:
+                        parent_prep_node = next((n for n in previous if n.name == last_node.in_path))
+                    paths.append(parent_prep_node.create_path_for_next())
                 path = "|".join(paths)
             else:
                 path = new_connections[-1].create_path_for_next()
@@ -86,23 +100,7 @@ def create_graph_connections(parent_node: AnyNode | "Stream", previous: PrepNode
             return
         elif isinstance(node, Stream):
             create_graph_connections(node, previous)
-    if isinstance(parent_node, Stream):
-        previous.append(new_connections)
-    else:
-        previous.extend(new_connections)
-
-
-def flatten_graph_connections(graph_connection: PrepNodeList) -> PrepNodeList:
-    flat_graph_connection = []
-
-    # This whole process could be shortened to more-itertools
-    # package's collapse
-    for element in graph_connection:
-        if isinstance(element, PrepNodeList):
-            flat_graph_connection.extend(element)
-        else:
-            flat_graph_connection.append(element)
-    return list(dict.fromkeys(flat_graph_connection))
+    previous.extend(new_connections)
 
 
 def view(graph: Stream, filename: Optional[str] = None) -> None:
@@ -115,7 +113,7 @@ def view(graph: Stream, filename: Optional[str] = None) -> None:
 
     graph_connection = PrepNodeList()
     create_graph_connections(graph, graph_connection)
-    graph_connection = flatten_graph_connections(graph_connection)
+    graph_connection = list(dict.fromkeys(graph_connection))
 
     # Adding nodes
     for pre_node in graph_connection:
