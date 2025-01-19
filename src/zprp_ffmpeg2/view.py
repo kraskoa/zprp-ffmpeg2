@@ -1,8 +1,5 @@
 import dataclasses
-from collections import UserList
 from enum import Enum
-from typing import Any
-from typing import Iterable
 from typing import List
 from typing import Optional
 
@@ -52,19 +49,8 @@ class PrepNode:
         return sub(r"(\w+)\(\d+\)", r'\1', self.name)
 
 
-class PrepNodeList(UserList):
-    def append(self, item: Any) -> None:
-        if not isinstance(item, (PrepNode, PrepNodeList)):
-            raise ValueError("Only PrepNode and PrepNodeList objects and can be added to PrepNodeList")
-        self.data.append(item)
-
-    def extend(self, iterable: Iterable) -> None:
-        for element in iterable:
-            self.append(element)
-
-
-def create_graph_connections(parent_node: AnyNode | "Stream", previous: PrepNodeList) -> None:
-    new_connections = PrepNodeList()
+def create_graph_connections(parent_node: AnyNode | "Stream", previous: List[PrepNode]) -> None:
+    new_connections = []
     nodes = None
     if isinstance(parent_node, Filter):
         nodes = parent_node._in
@@ -111,7 +97,7 @@ def view(graph: Stream, filename: Optional[str] = None) -> None:
 
     G = nx.DiGraph()
 
-    graph_connection = PrepNodeList()
+    graph_connection = []
     create_graph_connections(graph, graph_connection)
     graph_connection = list(dict.fromkeys(graph_connection))
 
