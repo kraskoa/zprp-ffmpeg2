@@ -1,14 +1,11 @@
-from copy import copy
 
 import pytest
 
 import zprp_ffmpeg2 as ffmpeg
+from zprp_ffmpeg2._api_compat import Filter
 from zprp_ffmpeg2.view import NodeColors
 from zprp_ffmpeg2.view import PrepNode
-from zprp_ffmpeg2.view import PrepNodeList
 from zprp_ffmpeg2.view import create_graph_connections
-from zprp_ffmpeg2.view import flatten_graph_connections
-from zprp_ffmpeg2._api_compat import Filter
 
 
 @pytest.fixture(autouse=True)
@@ -38,17 +35,15 @@ def test_create_graph_connections_simple_chain():
     in_ = ffmpeg.input("in.mp4")
     stream = ffmpeg.hflip(in_)
     out1 = stream.output("out.mp4")
-    graph_connection = PrepNodeList()
+    graph_connection = []
     create_graph_connections(out1, graph_connection)
-    assert len(graph_connection) == 1
-    assert len(graph_connection[0]) == 3
+    assert len(graph_connection) == 3
     node1 = PrepNode("in.mp4", NodeColors.INPUT, "")
     node2 = PrepNode("hflip", NodeColors.FILTER, "in.mp4")
     node3 = PrepNode("out.mp4", NodeColors.OUTPUT, "in.mp4;hflip")
-    node_stream = graph_connection[0]
-    assert node_stream[0] == node1
-    assert node_stream[1] == node2
-    assert node_stream[2] == node3
+    assert graph_connection[0] == node1
+    assert graph_connection[1] == node2
+    assert graph_connection[2] == node3
 
 
 def test_create_graph_connections_merged_outputs_chain():
@@ -58,20 +53,17 @@ def test_create_graph_connections_merged_outputs_chain():
     stream = ffmpeg.hflip(stream)
     out2 = stream.output("out2.mp4")
     merged = ffmpeg.merge_outputs(out1, out2)
-    nodes = PrepNodeList()
+    nodes = []
     create_graph_connections(merged, nodes)
     node1 = PrepNode("in.mp4", NodeColors.INPUT, "")
     node2 = PrepNode("fade", NodeColors.FILTER, "in.mp4")
     node3 = PrepNode("hflip", NodeColors.FILTER, "in.mp4;fade")
     node4 = PrepNode("out1.mp4", NodeColors.OUTPUT, "in.mp4;fade")
     node5 = PrepNode("out2.mp4", NodeColors.OUTPUT, "in.mp4;fade;hflip")
-    stream1 = PrepNodeList()
-    stream2 = PrepNodeList()
-    stream1.extend([node1, node2, node4])
-    stream2.extend([node1, node2, node3, node5])
-    assert len(nodes) == 2
-    assert stream1 == nodes[0]
-    assert stream2 == nodes[1]
+    nodes_set = set(nodes)
+    twin_strim = set([node1, node2, node3, node4, node5])
+    assert len(nodes_set) == 5
+    assert nodes_set == twin_strim
 
 
 def test_create_graph_connections_concat():
@@ -80,39 +72,14 @@ def test_create_graph_connections_concat():
     stream = ffmpeg.fade(stream, type="in", start_frame=0, nb_frames=30)
     stream = ffmpeg.concat((stream, stream2))
     stream = ffmpeg.output(stream, "out.mp4")
-    nodes = PrepNodeList()
+    nodes = []
     create_graph_connections(stream, nodes)
     node1 = PrepNode("in.mp4", NodeColors.INPUT, "")
     node2 = PrepNode("in2.mp4", NodeColors.INPUT, "")
     node3 = PrepNode("fade", NodeColors.FILTER, "in.mp4")
-    node4 = PrepNode("concat", NodeColors.FILTER, "in2.mp4|in.mp4;fade")
+    node4 = PrepNode("concat", NodeColors.FILTER, "in.mp4;fade|in2.mp4")
     node5 = PrepNode("out.mp4", NodeColors.OUTPUT, "concat")
-    assert len(nodes) == 4
-    stream1 = PrepNodeList()
+    assert len(nodes) == 5
+    stream1 = []
     stream1.extend([node1, node2, node3, node4, node5])
-    nodes = flatten_graph_connections(nodes)
     assert set(nodes) == set(stream1)
-
-
-def test_flatten_graph_connections_simple():
-    nodes = PrepNodeList()
-    node1 = PrepNode("in.mp4", NodeColors.INPUT, "")
-    node2 = PrepNode("in2.mp4", NodeColors.INPUT, "")
-    nodes.extend([node1, node2])
-    assert nodes == flatten_graph_connections(nodes)
-
-
-def test_flatten_graph_connections_with_lists():
-    nodes = PrepNodeList()
-    node1 = PrepNode("in.mp4", NodeColors.INPUT, "")
-    node2 = PrepNode("in2.mp4", NodeColors.INPUT, "")
-    node3 = PrepNode("flip", NodeColors.FILTER, "in2.mp4")
-    nodes.append(node1)
-    inner_nodes = PrepNodeList()
-    inner_nodes.extend([node2, node3])
-    nodes.append(inner_nodes)
-    flat = flatten_graph_connections(nodes)
-    assert len(flat) == 3
-    assert flat[0] == node1
-    assert flat[1] == node2
-    assert flat[2] == node3

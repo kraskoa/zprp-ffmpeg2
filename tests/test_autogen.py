@@ -6,11 +6,13 @@ from filters_autogen import parse_ffmpeg
 
 assets_dir = Path(__file__).parent / "assets"
 
+
 @pytest.mark.requires_gcc
 def test_parse_empty(tmp_path: Path):
     filter_source = tmp_path / "vf_something.c"
     filter_source.write_text("")
     assert parse_ffmpeg.parse_one_file(filter_source) == []
+
 
 @pytest.mark.requires_gcc
 def test_parse_simple():
@@ -23,6 +25,7 @@ def test_parse_simple():
     assert filters_list[0].description == "simple filter"
     assert filters_list[0].type == "AVMEDIA_TYPE_VIDEO"  # at this stage, type is string of identifier
     assert filters_list[0].options == []
+
 
 @pytest.mark.requires_gcc
 def test_parse_one_option():
@@ -40,6 +43,7 @@ def test_parse_one_option():
     assert filters_list[0].options[0].type == "AV_OPT_TYPE_STRING"  # this is a string as well
     assert filters_list[0].options[0].available_values == {}  # this option has no named consts
 
+
 @pytest.mark.requires_gcc
 def test_parse_named_constants():
     """video filter with option that has possible choices"""
@@ -54,6 +58,7 @@ def test_parse_named_constants():
     assert filters_list[0].options[0].description == "select color"
     assert filters_list[0].options[0].type == "AV_OPT_TYPE_STRING"
     assert filters_list[0].options[0].available_values == {"red":1,"green":2,"blue":3}
+
 
 @pytest.mark.requires_gcc
 def test_parse_allfilters():

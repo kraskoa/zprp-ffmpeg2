@@ -17,6 +17,7 @@ def test_fill_template_no_options():
 
     assert target==code_string
 
+
 def test_fill_template():
     f = Filter(name="template_test_2",
                description="Here's a description",

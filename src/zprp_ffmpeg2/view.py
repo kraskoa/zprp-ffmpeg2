@@ -1,5 +1,6 @@
 import dataclasses
 from enum import Enum
+from re import sub
 from typing import List
 from typing import Optional
 
@@ -9,7 +10,6 @@ from .filter_graph import MergeOutputFilter
 from .filter_graph import SinkFilter
 from .filter_graph import SourceFilter
 from .filter_graph import Stream
-from re import sub
 
 
 class NodeColors(Enum):
@@ -46,15 +46,12 @@ class PrepNode:
 
     @property
     def command(self):
-        return sub(r"(\w+)\(\d+\)", r'\1', self.name)
+        return sub(r"(\w+)\(\d+\)", r"\1", self.name)
 
 
-def create_graph_connections(
-        parent_node: AnyNode | Stream,
-        previous: List[PrepNode]
-        ) -> None:
+def create_graph_connections(parent_node: AnyNode | Stream, previous: List[PrepNode]) -> None:
     """Creates list of PrepNode objects that contain stream data to later
-       transform it to a graph
+    transform it to a graph
     """
     new_connections = []
     nodes = None
@@ -64,17 +61,9 @@ def create_graph_connections(
         nodes = parent_node._nodes
     for node in nodes:
         if isinstance(node, SourceFilter):
-            new_connections.append(
-                PrepNode(node.in_path.split("/")[-1], NodeColors.INPUT, "")
-            )
+            new_connections.append(PrepNode(node.in_path.split("/")[-1], NodeColors.INPUT, ""))
         elif isinstance(node, SinkFilter):
-            new_connections.append(
-                PrepNode(
-                    node.out_path.split("/")[-1],
-                    NodeColors.OUTPUT,
-                    new_connections[-1].create_path_for_next()
-                )
-            )
+            new_connections.append(PrepNode(node.out_path.split("/")[-1], NodeColors.OUTPUT, new_connections[-1].create_path_for_next()))
         elif isinstance(node, Filter):
             path = ""
             if not new_connections:
@@ -85,31 +74,16 @@ def create_graph_connections(
                     parent_prep_node = None
                     if isinstance(last_node, Filter):
                         parent_prep_node = next(
-                            (prep_node
-                             for prep_node
-                             in previous
-                             if ((prep_node.command, prep_node.id)
-                                 == (last_node.command, last_node._id)))
+                            prep_node for prep_node in previous if ((prep_node.command, prep_node.id) == (last_node.command, last_node._id))
                         )
                     else:
-                        parent_prep_node = next(
-                            (prep_node
-                             for prep_node
-                             in previous
-                             if prep_node.name == last_node.in_path)
-                        )
+                        parent_prep_node = next(prep_node for prep_node in previous if prep_node.name == last_node.in_path)
                     paths.append(parent_prep_node.create_path_for_next())
                 path = "|".join(paths)
             else:
                 path = new_connections[-1].create_path_for_next()
             suffix = "" if node._id < 2 else f"({node._id})"
-            new_connections.append(
-                PrepNode(
-                    f"{node.command}{suffix}",
-                    NodeColors.FILTER,
-                    path
-                )
-            )
+            new_connections.append(PrepNode(f"{node.command}{suffix}", NodeColors.FILTER, path))
         elif isinstance(node, MergeOutputFilter):
             for stream in node.streams:
                 create_graph_connections(stream, previous)

@@ -2,6 +2,7 @@
 It slightly violates DRY, but the parameter types are different. It is what it is"""
 
 from collections import OrderedDict
+from collections import defaultdict
 from copy import deepcopy
 from dataclasses import dataclass
 from enum import Enum
@@ -11,7 +12,7 @@ from typing import Iterable
 from typing import List
 from typing import Optional
 from typing import Union
-from collections import defaultdict
+
 from ordered_set import OrderedSet
 
 
@@ -48,6 +49,7 @@ class MergeOutputCommand(ComplexCommand):
 
 class Filter:
     """Filters can have many inputs and many outputs, holds the filter name and potential params"""
+
     _filter_counter = defaultdict(int)
 
     def __new__(cls, *args, **kwargs):

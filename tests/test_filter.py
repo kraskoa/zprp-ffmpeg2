@@ -8,6 +8,7 @@ def test_input_output_no_filter():
     out = stream.output("output.mp4")
     assert out.get_args() == ["-i", "input.mp4", "output.mp4"]
 
+
 def test_filter_build_command_no_opts():
     f = Filter(command="hflip")
     command = f.get_command()
@@ -16,6 +17,7 @@ def test_filter_build_command_no_opts():
     assert command.filter_type == "AVMEDIA_TYPE_VIDEO"
     assert command.filter_type_command == ":v]"
 
+
 def test_filter_build_command_with_opts():
     f = Filter(command="scale", params=[FilterOption(name="w", value=20), FilterOption(name="h", value=40)])
     command = f.get_command()
@@ -23,6 +25,7 @@ def test_filter_build_command_with_opts():
     assert command.params == "=w=20:h=40"
     assert command.filter_type == "AVMEDIA_TYPE_VIDEO"
     assert command.filter_type_command == ":v]"
+
 
 def test_concat():
     g1 = ffmpeg.input("in1.mp4")
@@ -34,6 +37,7 @@ def test_concat():
 
     assert g1 in result._nodes[0]._in
     assert g2 in result._nodes[0]._in
+
 
 def test_overlay():
     main_file = ffmpeg.input("in1.mp4")
