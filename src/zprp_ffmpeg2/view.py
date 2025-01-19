@@ -39,14 +39,17 @@ class PrepNode:
 
     @property
     def id(self):
-        if (string := sub(r"\w+\((\d+)\)", r"\1", self.name)) == self.name:
+        if (string := sub(r"\w+\((\d+)\)", r"\1", self.name)) == self.name or "." in self.name:
             return 1
         else:
             return int(string)
 
     @property
     def command(self):
-        return sub(r"(\w+)\(\d+\)", r"\1", self.name)
+        if "." in self.name:
+            return self.name
+        else:
+            return sub(r"(\w+)\(\d+\)", r"\1", self.name)
 
 
 def create_graph_connections(parent_node: AnyNode | Stream, previous: List[PrepNode]) -> None:

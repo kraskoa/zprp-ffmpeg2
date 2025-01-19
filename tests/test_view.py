@@ -31,6 +31,28 @@ def test_prep_node_prev_node():
     assert node3.prev_node() == ["hflip", "in2.mp4"]
 
 
+def test_prep_node_id():
+    node1 = PrepNode("in.mp4", NodeColors.INPUT, "")
+    assert node1.id == 1
+    node2 = PrepNode("hflip", NodeColors.FILTER, node1.create_path_for_next())
+    assert node2.id == 1
+    node3 = PrepNode("concat(2)", NodeColors.FILTER, "in.mp4;hflip|in2.mp4")
+    assert node3.id == 2
+    node4 = PrepNode("in(2).mp4", NodeColors.INPUT, "")
+    assert node4.id == 1
+
+
+def test_prep_node_command():
+    node1 = PrepNode("in.mp4", NodeColors.INPUT, "")
+    assert node1.command == node1.name
+    node2 = PrepNode("hflip", NodeColors.FILTER, node1.create_path_for_next())
+    assert node2.command == node2.name
+    node3 = PrepNode("concat(2)", NodeColors.FILTER, "in.mp4;hflip|in2.mp4")
+    assert node3.command == "concat"
+    node4 = PrepNode("in(2).mp4", NodeColors.INPUT, "")
+    assert node4.command == "in(2).mp4"
+
+
 def test_create_graph_connections_simple_chain():
     in_ = ffmpeg.input("in.mp4")
     stream = ffmpeg.hflip(in_)
