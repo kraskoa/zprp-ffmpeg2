@@ -7,12 +7,12 @@ from copy import deepcopy
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any
+from typing import ClassVar
 from typing import Dict
 from typing import Iterable
 from typing import List
 from typing import Optional
 from typing import Union
-from typing import ClassVar
 
 from ordered_set import OrderedSet
 
