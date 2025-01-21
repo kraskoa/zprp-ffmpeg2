@@ -10,16 +10,15 @@ ZPRP FFmpeg 2
     * - docs
       - |docs|
     * - tests
-      - |codecov|
+      - |coverage|
     * - package
       - |version| |wheel| |supported-versions| |supported-implementations| |commits-since|
 .. |docs| image:: https://readthedocs.org/projects/zprp-ffmpeg2/badge/?style=flat
     :target: https://readthedocs.org/projects/zprp-ffmpeg2/
     :alt: Documentation Status
 
-.. |codecov| image:: https://codecov.io/gh/ffmpeg-zprp/zprp-ffmpeg/branch/main/graphs/badge.svg?branch=main
-    :alt: Coverage Status
-    :target: https://app.codecov.io/gh/kraskoa/zprp-ffmpeg2
+.. |coverage| image:: https://img.shields.io/endpoint?url=https://gist.github.com/kraskoa/11bda8368dc785b257cd97cf13c6d953
+    :alt: Test Coverage
 
 .. |version| image:: https://img.shields.io/pypi/v/zprp-ffmpeg2.svg
     :alt: PyPI Package latest release
