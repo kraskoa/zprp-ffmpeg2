@@ -4,6 +4,17 @@ Changelog
 All notable changes to this project will be documented in this file.
 Dates are displayed in UTC.
 
+`v3.1.1 <https://github.com/kraskoa/zprp-ffmpeg2/compare/v3.1.0...v3.1.1>`__
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+   20 January 2025
+
+-  Fixed incorrect implementation of merge_outputs() function
+   ```f991c3d`` <https://github.com/kraskoa/zprp-ffmpeg2/commit/f991c3d594d593b8c11fed2054a21a44df9d7b3a>`__
+-  Cosmetic and slight logical changes to view.py
+   ```d7cf00a`` <https://github.com/kraskoa/zprp-ffmpeg2/commit/d7cf00afe8c2d708af85b3b97791232803c77c18>`__
+-  Some tests for changed functionalities
+   ```7dc11d6`` <https://github.com/kraskoa/zprp-ffmpeg2/commit/7dc11d68266d5aba8f62915d5a5407bfb809a5e9>`__
 
 `v3.1.0 <https://github.com/kraskoa/zprp-ffmpeg2/compare/v3.0.1...v3.1.0>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
