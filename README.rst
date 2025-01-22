@@ -17,7 +17,7 @@ ZPRP FFmpeg 2
     :target: https://readthedocs.org/projects/zprp-ffmpeg2/
     :alt: Documentation Status
 
-.. |coverage| image:: https://img.shields.io/endpoint?url=https://gist.github.com/kraskoa/11bda8368dc785b257cd97cf13c6d953
+.. |coverage| image:: https://img.shields.io/endpoint?url=https://gist.github.com/kraskoa/11bda8368dc785b257cd97cf13c6d953/raw/coverage.json
     :alt: Test Coverage
 
 .. |version| image:: https://img.shields.io/pypi/v/zprp-ffmpeg2.svg
