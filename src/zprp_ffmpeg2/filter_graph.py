@@ -6,6 +6,7 @@ from collections import defaultdict
 from copy import deepcopy
 from dataclasses import dataclass
 from enum import Enum
+from re import sub
 from typing import Any
 from typing import ClassVar
 from typing import Dict
@@ -269,22 +270,16 @@ class FilterParser:
             filters = "".join(self.filters)[:-1]
             o_counter = 0
             new_outputs = []
-            mapped_outs = [out for out in self.outputs if "-map" in out]
-            other_outs = [out for out in self.outputs if out not in mapped_outs]
-            for output in mapped_outs[:-1]:
-                k = output.find("[")
-                l = output.find("]")
-                out = output[k + 1 : l]
-                j = filters.find(out)
-                new_out = f"[out{o_counter}]"
-                filters = filters[: j - 1] + ",split" + new_out + filters[j - 1 :]
-                new_output = output[:k] + new_out + output[l + 1 :]
-                new_outputs.append(new_output)
-                o_counter += 1
-            last_output = mapped_outs[-1]
+            last_code = sub(r".+\[(\w\d+)\]$", r"\1", filters)
+            for output in self.outputs:
+                if (code := sub(r"^-map \[(\w\d+)\].+$", r"\1", output, count=1)) == output or code == last_code:
+                    new_outputs.append(output)
+                else:
+                    new_out = f"[out{o_counter}]"
+                    filters = sub(r"(\[{}\])".format(code), r",split{}\1".format(new_out), filters, count=1)  # noqa UP032
+                    new_outputs.append(sub(r"\[{}\]".format(code), new_out, output, count=1))  # noqa UP032
+                    o_counter += 1
             self.outputs = new_outputs
-            self.outputs.append(last_output)
-            self.outputs.extend(other_outs)
 
             return (
                 " ".join(list(OrderedSet(self.inputs)))
