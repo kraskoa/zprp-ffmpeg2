@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "zprp_ffmpeg2"
-version = "3.1.1"
+version = "3.1.2"
 description = "ffmpeg filter graph bindings for python"
 authors = ["Gregory Chmielewski", "Adam Kraś", "Krzysztof Król"]
 license = "MIT"
