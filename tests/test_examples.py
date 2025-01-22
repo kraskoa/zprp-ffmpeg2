@@ -22,6 +22,32 @@ def test_concat_fade_duplicate():
     ]
 
 
+def test_merge_outputs_multiple():
+    stream = ffmpeg.input("input.mp4")
+    stream = ffmpeg.hflip(stream)
+    out1 = stream.output("out1.mp4")
+    stream = ffmpeg.fade(stream, type="in", start_frame=0, nb_frames=30)
+    out2 = stream.output("out2.mp4")
+    stream = ffmpeg.hflip(stream)
+    out3 = stream.output("out3.mp4")
+    merged = ffmpeg.merge_outputs(out1, out2, out3)
+    assert get_args(merged) == [
+        "-i",
+        "input.mp4",
+        "-filter_complex",
+        '"[0:v]hflip,split[out0][v0];[v0]fade=type=in:nb_frames=30,split[out1][v1];[v1]hflip[v2]"',
+        "-map",
+        "[out0]",
+        "out1.mp4",
+        "-map",
+        "[out1]",
+        "out2.mp4",
+        "-map",
+        "[v2]",
+        "out3.mp4"
+    ]
+
+
 def test__merge_outputs_with_filters():
     in_ = ffmpeg.input("in.mp4")
     in_flip = ffmpeg.hflip(in_)
@@ -34,10 +60,10 @@ def test__merge_outputs_with_filters():
         "in.mp4",
         "-filter_complex",
         '"[0:v]hflip[v0]"',
+        "out1.mp4",
         "-map",
         "[v0]",
         "out2.mp4",
-        "out1.mp4",
     ]
     assert ffmpeg.get_args([out1, out2]) == [
         "-i",
