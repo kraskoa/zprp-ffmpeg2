@@ -6,12 +6,12 @@ source =
 [run]
 branch = true
 source =
-    zprp_ffmpeg
+    zprp_ffmpeg2
     filters_autogen
     tests
 parallel = true
 omit =
-    src/zprp_ffmpeg/generated_filters.py
+    src/zprp_ffmpeg2/generated_filters.py
 
 [report]
 show_missing = true
