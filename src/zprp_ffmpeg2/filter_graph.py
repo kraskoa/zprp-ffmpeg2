@@ -6,6 +6,7 @@ from collections import defaultdict
 from copy import deepcopy
 from dataclasses import dataclass
 from enum import Enum
+from re import sub
 from typing import Any
 from typing import ClassVar
 from typing import Dict
@@ -13,7 +14,6 @@ from typing import Iterable
 from typing import List
 from typing import Optional
 from typing import Union
-from re import sub
 
 from ordered_set import OrderedSet
 
@@ -276,8 +276,8 @@ class FilterParser:
                     new_outputs.append(output)
                 else:
                     new_out = f"[out{o_counter}]"
-                    filters = sub(r"(\[{}\])".format(code), r",split{}\1".format(new_out), filters, count=1)
-                    new_outputs.append(sub(r"\[{}\]".format(code), new_out, output, count=1))
+                    filters = sub(r"(\[{}\])".format(code), r",split{}\1".format(new_out), filters, count=1)  # noqa UP032
+                    new_outputs.append(sub(r"\[{}\]".format(code), new_out, output, count=1))  # noqa UP032
                     o_counter += 1
             self.outputs = new_outputs
 
