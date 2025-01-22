@@ -1,6 +1,6 @@
 from pathlib import Path
 
-import zprp_ffmpeg as ffmpeg
+import zprp_ffmpeg2 as ffmpeg
 
 
 def merge_outputs():
