@@ -278,7 +278,8 @@ class FilterParser:
                     new_outputs.append(output)
                 else:
                     new_out = f"[out{o_counter}]"
-                    filters = sub(r"(\[{}\])".format(code), r",split{}\1".format(new_out), filters, count=1)  # noqa UP032
+                    split_tmp = f"[tmp{o_counter}];[tmp{o_counter}]split"
+                    filters = sub(r"(\[{}\])".format(code), r"{}{}\1".format(split_tmp, new_out), filters, count=1)  # noqa UP032
                     new_outputs.append(sub(r"\[{}\]".format(code), new_out, output, count=1))  # noqa UP032
                     o_counter += 1
             self.outputs = new_outputs

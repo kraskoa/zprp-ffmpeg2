@@ -35,7 +35,7 @@ def test_merge_outputs_multiple():
         "-i",
         "input.mp4",
         "-filter_complex",
-        '"[0:v]hflip,split[out0][v0];[v0]fade=type=in:nb_frames=30,split[out1][v1];[v1]hflip[v2]"',
+        '"[0:v]hflip[tmp0];[tmp0]split[out0][v0];[v0]fade=type=in:nb_frames=30[tmp1];[tmp1]split[out1][v1];[v1]hflip[v2]"',
         "-map",
         "[out0]",
         "out1.mp4",
