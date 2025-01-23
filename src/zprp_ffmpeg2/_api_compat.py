@@ -48,7 +48,7 @@ def global_args(stream: Stream, *args) -> Stream:
 
 
 @singledispatch
-def get_args(arg):
+def get_args(arg, overwrite_output: bool = False):
     return "Unknown type"
 
 
@@ -62,7 +62,7 @@ def _(stream: Stream, overwrite_output: bool = False) -> List[str]:
 
 
 @get_args.register(list)
-def _(streams: list[Stream], overwrite_output: bool = False) -> List[str]:
+def _(streams: List[Stream], overwrite_output: bool = False) -> List[str]:
     """Build command-line arguments to be passed to ffmpeg."""
     streams.reverse()
     new_stream = Stream().append(MergeOutputFilter(streams))

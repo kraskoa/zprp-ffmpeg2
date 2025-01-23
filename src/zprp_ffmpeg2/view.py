@@ -1,9 +1,16 @@
 import dataclasses
 from enum import Enum
 from re import sub
-from typing import List, Optional, Union
+from typing import List
+from typing import Optional
+from typing import Union
 
-from .filter_graph import AnyNode, Filter, MergeOutputFilter, SinkFilter, SourceFilter, Stream
+from .filter_graph import AnyNode
+from .filter_graph import Filter
+from .filter_graph import MergeOutputFilter
+from .filter_graph import SinkFilter
+from .filter_graph import SourceFilter
+from .filter_graph import Stream
 
 
 class NodeColors(Enum):
@@ -45,10 +52,11 @@ def create_graph_connections(parent_node: Union[AnyNode, Stream], previous: List
     new_connections: List[PrepNode] = []
 
     # Ensuring correct node access
+    nodes: List[Union[SourceFilter, SinkFilter, Filter, Stream, MergeOutputFilter]] = []
     if isinstance(parent_node, Filter):
-        nodes: List[Union[SourceFilter, SinkFilter, Filter]] = parent_node._in
+        nodes.extend(parent_node._in)
     elif isinstance(parent_node, Stream):
-        nodes: List[Union[SourceFilter, SinkFilter, Filter]] = parent_node._nodes  # Ensure Stream has _nodes
+        nodes.extend(parent_node._nodes)
     else:
         return  # Avoid processing unknown types
 
@@ -69,13 +77,12 @@ def create_graph_connections(parent_node: Union[AnyNode, Stream], previous: List
                     last_node = stream._nodes[-1] if hasattr(stream, "_nodes") else None
                     if isinstance(last_node, Filter):
                         parent_prep_node = next(
-                            prep_node for prep_node in previous
+                            prep_node
+                            for prep_node in previous
                             if (prep_node.command, prep_node.id) == (last_node.command, getattr(last_node, "_id", -1))
                         )
                     elif isinstance(last_node, SourceFilter):
-                        parent_prep_node = next(
-                            prep_node for prep_node in previous if prep_node.name == last_node.in_path
-                        )
+                        parent_prep_node = next(prep_node for prep_node in previous if prep_node.name == last_node.in_path.split("/")[-1])
                     else:
                         continue
                     paths.append(parent_prep_node.create_path_for_next())

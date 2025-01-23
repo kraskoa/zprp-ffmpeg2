@@ -68,7 +68,7 @@ class Filter:
         self.params = params if params else []
         self.filter_type = filter_type
 
-    def add_output(self, parent: Union["Filter", "SourceFilter", "SinkFilter"]):
+    def add_output(self, parent: "AnyNode"):
         self._out.append(parent)
 
     def add_input(self, child: "Filter | SourceFilter | Stream"):
@@ -130,20 +130,22 @@ class SinkFilter:
 # in python 3.12 there is 'type' keyword, but we are targetting 3.8
 # https://stackoverflow.com/questions/76712720/typeerror-unsupported-operand-types-for-type-and-nonetype
 # python >3.9 uses , instead of | idk if it works with python 3.12
-AnyNode = Union[Filter, SourceFilter, SinkFilter]
+AnyNode = Union[Filter, SourceFilter, SinkFilter, "MergeOutputFilter"]
 
 
 class Stream:
     def __init__(self) -> None:
-        self._nodes: List[Union[Filter, SourceFilter, SinkFilter]] = []
+        self._nodes: List[AnyNode] = []
         self.global_options: List[str] = []
 
-    def append(self, node: Union[Filter, SourceFilter, SinkFilter]) -> "Stream":
+    def append(self, node: AnyNode) -> "Stream":
         # Create a deepcopy of the current instance
         new_stream = deepcopy(self)
         if len(new_stream._nodes) > 0:
             # Connect the last node to the new one
-            if not isinstance(new_stream._nodes[-1], SinkFilter) and not isinstance(node, SourceFilter):
+            if (isinstance(new_stream._nodes[-1], SourceFilter) and not isinstance(node, (SourceFilter, MergeOutputFilter))) or (
+                isinstance(new_stream._nodes[-1], Filter) and not isinstance(node, (SourceFilter, MergeOutputFilter))
+            ):
                 new_stream._nodes[-1].add_output(node)
                 node.add_input(new_stream._nodes[-1])
         # Append the new node
