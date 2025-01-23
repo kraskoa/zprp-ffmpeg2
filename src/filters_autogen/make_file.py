@@ -95,6 +95,6 @@ from zprp_ffmpeg2.FilterGraph import Stream\n\n"""
 
     file_bytes = str.encode(construct_file(filters))
 
-    with (Path(__file__).parent / "out.py").open("wb+") as f:
-        f.write(imports)
-        f.write(file_bytes)
+    with (Path(__file__).parent / "out.py").open("wb+") as f2:
+        f2.write(imports)
+        f2.write(file_bytes)

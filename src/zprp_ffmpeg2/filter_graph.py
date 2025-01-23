@@ -68,7 +68,7 @@ class Filter:
         self.params = params if params else []
         self.filter_type = filter_type
 
-    def add_output(self, parent: "Filter | SinkFilter"):
+    def add_output(self, parent: Union["Filter", "SourceFilter", "SinkFilter"]):
         self._out.append(parent)
 
     def add_input(self, child: "Filter | SourceFilter | Stream"):
@@ -138,7 +138,7 @@ class Stream:
         self._nodes: List[Union[Filter, SourceFilter, SinkFilter]] = []
         self.global_options: List[str] = []
 
-    def append(self, node: Union[Filter, SourceFilter, SinkFilter, "MergeOutputFilter"]) -> "Stream":
+    def append(self, node: Union[Filter, SourceFilter, SinkFilter]) -> "Stream":
         # Create a deepcopy of the current instance
         new_stream = deepcopy(self)
         if len(new_stream._nodes) > 0:
